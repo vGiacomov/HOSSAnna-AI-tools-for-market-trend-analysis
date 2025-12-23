@@ -18,7 +18,6 @@ from App.translations import TRANSLATIONS
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
 
 
-# --- Helpery ---
 
 def get_tr(key):
     lang = AppState.get_language()
@@ -370,9 +369,12 @@ class PredictionController:
         if not symbol: QMessageBox.warning(None, "Error", get_tr("error_no_symbol")); return
 
         prediction_ranges = {
-            "5m": {"period": "2d", "interval": "5m"}, "15m": {"period": "3d", "interval": "15m"},
-            "1h": {"period": "3d", "interval": "60m"}, "1d": {"period": "30d", "interval": "1d"},
-            "7d": {"period": "180d", "interval": "1wk"}, "30d": {"period": "5y", "interval": "1mo"},
+            "5m": {"period": "2d", "interval": "5m"},
+            "15m": {"period": "3d", "interval": "15m"},
+            "1h": {"period": "1wk", "interval": "60m"},
+            "1d": {"period": "1y", "interval": "1d"},
+            "7d": {"period": "1y", "interval": "1wk"},
+            "30d": {"period": "5y", "interval": "1mo"},
         }
         cfg = prediction_ranges.get(self.selected_range, prediction_ranges["15m"])
         if self.calc_btn: self.calc_btn.setEnabled(False)
@@ -396,18 +398,15 @@ CONTROLLER = PredictionController()
 
 
 def get_program_data():
-    # --- PANEL GÓRNY (WYKRES) ---
     top_panel = [
         {"type": "custom_widget", "widget_class": PlaceholderWidget, "on_create": CONTROLLER.set_placeholder},
         {"type": "custom_widget", "widget_class": ChartWidget, "on_create": CONTROLLER.set_chart},
     ]
 
-    # --- PANEL DOLNY LEWY (INPUTY - Custom Widget) ---
     bottom_left_panel = [
         {"type": "custom_widget", "widget_class": ControlPanelWidget},
     ]
 
-    # --- PANEL DOLNY PRAWY (WYNIKI - Custom Widget) ---
     bottom_right_panel = [
         {"type": "custom_widget", "widget_class": PriceSummaryWidget, "on_create": CONTROLLER.set_price_summary},
     ]

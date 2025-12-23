@@ -185,7 +185,7 @@ class ModuleTab(QScrollArea):
 
         layout = QVBoxLayout(panel)
         layout.setSpacing(10)
-        layout.setContentsMargins(15, 15, 15, 15)  # Marginesy wewnątrz ramki
+        layout.setContentsMargins(15, 15, 15, 15)
 
         for el in elements:
             w = self._create_element(el)

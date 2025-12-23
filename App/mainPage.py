@@ -299,8 +299,8 @@ class NavMenu(QFrame, AppState):
     def _create_nav_button(self, icon_path):
         button = QPushButton()
 
-        button.setFixedSize(40, 40)
-        button.setIconSize(QSize(24, 24))
+        button.setFixedSize(50, 50)
+        button.setIconSize(QSize(28, 28))
 
         # Ustaw ikonę
         icon = QIcon(icon_path)
