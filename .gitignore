@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+*.spec
+
+# PyCharm
+.idea/
+*.iml
+
+# Virtual environments
+venv/
+.venv/
+venv_gpctools/
+
+# Executables / packages
+*.exe
+*.pkg
+
+# Resource compilations
+*.pyc
+*.pyo
+*.qrc
