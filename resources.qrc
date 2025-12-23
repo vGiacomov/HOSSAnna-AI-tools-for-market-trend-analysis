@@ -1,0 +1,13 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+
+    <file>Icons/Logo.ico</file>
+    <file>Launcher/Icons/Logo.png</file>
+    <file>Launcher/terms.txt</file>
+
+
+    <file>App/Icons/home.png</file>
+    <file>App/Icons/settings.png</file>
+
+</qresource>
+</RCC>
