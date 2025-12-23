@@ -25,7 +25,7 @@ except Exception:
 
 # import tłumaczeń
 try:
-    from translations import TRANSLATIONS
+    from Launcher.translations import TRANSLATIONS
 except Exception:
     TRANSLATIONS = {
         "English": {

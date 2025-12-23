@@ -389,7 +389,7 @@ class WelcomePanel(CardFrame):
         self.update_ui()
 
     def open_repo(self):
-        QDesktopServices.openUrl(QUrl("https://github.com/"))
+        QDesktopServices.openUrl(QUrl("https://github.com/vGiacomov/HOSSAnna---AI-tools-for-market-trend-analysis"))
 
     def update_ui(self):
         self.lbl_title.setText(get_tr("welcome_title"))
