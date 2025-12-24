@@ -5,7 +5,6 @@ import socket
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QProgressBar
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPixmap
-from pathlib import Path
 
 
 class AdminCheck:
@@ -15,39 +14,33 @@ class AdminCheck:
             try:
                 is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
                 return is_admin
-            except Exception as e:
+            except Exception:
                 return False
         else:
-            return os.geteuid() == 0
-
+            try:
+                return os.geteuid() == 0
+            except AttributeError:
+                return False
 
 
 class NetworkCheck:
     @staticmethod
     def check_network_connection(host="8.8.8.8", port=53, timeout=2):
-
         try:
             with socket.create_connection((host, port), timeout=timeout) as conn:
                 return True
-        except socket.timeout:
-            return False
-        except OSError as e:
+        except (socket.timeout, OSError):
             return False
 
 
-
-class FirstStartCheck():
+class ConfigCheck:
     @staticmethod
-    def check_first_start(appFolderPath):
-        if appFolderPath:
-            config_path = appFolderPath  / 'Configs' / 'config.txt'
-
-            if config_path.is_file():
-                return True
-            else:
-                return False
-        else:
+    def config_exists(appFolderPath):
+        if not appFolderPath:
             return False
+
+        config_path = appFolderPath / 'Configs' / 'config.txt'
+        return config_path.is_file()
 
 
 class LauncherWindow(QWidget):
@@ -56,27 +49,41 @@ class LauncherWindow(QWidget):
 
         self.settings = settings
         self.current_step = 0
-        self.total_steps = 3  #Lancher Steps
 
-        # Inicjalizacja okna
+        self.steps = [
+            (AdminCheck.check_admin_permission,
+             self.settings.set_admin_value,
+             200, "Checking permissions..."),
+
+            (NetworkCheck.check_network_connection,
+             self.settings.set_network_value,
+             400, "Checking network connection..."),
+
+            (lambda: ConfigCheck.config_exists(self.settings.appFolderPath),
+             self.settings.set_first_start_value,
+             600, "Checking configuration..."),
+        ]
+
+        self.total_steps = len(self.steps)
+
+        # Window initialization
         self.resize(720, 480)
         self.setFixedSize(720, 480)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
-        # Ustawienie layoutu
+        # Setup layout
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.setContentsMargins(50, 50, 50, 50)
 
         # Logo
         self.logo_label = QLabel()
-
         pixmap = QPixmap(':/Launcher/Icons/Logo.png')
         if not pixmap.isNull():
             scaled_pixmap = pixmap.scaled(400, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.logo_label.setPixmap(scaled_pixmap)
         else:
-            self.logo_label.setText("HOSSAnna")
+            self.logo_label.setText(self.settings.appName)
             self.logo_label.setStyleSheet("font-size: 48px; font-weight: bold; color: #333;")
         self.logo_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.logo_label)
@@ -111,35 +118,24 @@ class LauncherWindow(QWidget):
         self.setLayout(layout)
         self.setStyleSheet("""QWidget {background-color: white;}""")
 
-        QTimer.singleShot(500, self.start_checks)
+        # Start checks after 500ms
+        QTimer.singleShot(500, self.execute_next_step)
 
+    def execute_next_step(self):
+        if self.current_step < self.total_steps:
+            check_func, setter_func, delay, status_text = self.steps[self.current_step]
+            self.status_label.setText(status_text)
 
-    def start_checks(self):
-        self.check_admin()
+            # Execute check and store result
+            result = check_func()
+            setter_func(result)
 
-    def check_admin(self):
-        self.status_label.setText("Checking permissions...")
-        self.settings.set_admin_value(
-            AdminCheck.check_admin_permission()
-        )
-        self.update_progress()
-        QTimer.singleShot(800, self.check_network)
+            self.update_progress()
 
-    def check_network(self):
-        self.status_label.setText("Checking network connection...")
-        self.settings.set_network_value(
-            NetworkCheck.check_network_connection()
-        )
-        self.update_progress()
-        QTimer.singleShot(1000, self.check_first_start)
-
-    def check_first_start(self):
-        self.status_label.setText("Checking the configuration...")
-        self.settings.set_first_start_value(
-            FirstStartCheck.check_first_start(self.settings.appFolderPath)
-        )
-        self.update_progress()
-        QTimer.singleShot(1500, self.finish_loading)
+            if self.current_step < self.total_steps:
+                QTimer.singleShot(delay, self.execute_next_step)
+            else:
+                QTimer.singleShot(delay, self.finish_loading)
 
     def update_progress(self):
         self.current_step += 1
@@ -147,10 +143,10 @@ class LauncherWindow(QWidget):
         self.progress_bar.setValue(progress_value)
 
     def finish_loading(self):
-        if self.settings.isConfig:
-            self.status_label.setText("Preparing Setup Configurator")
+        if not self.settings.isConfig:
+            self.status_label.setText("Preparing Setup Configurator...")
         else:
-            self.status_label.setText("Preparing App")
+            self.status_label.setText("Preparing Application...")
 
         self.progress_bar.setValue(100)
         QTimer.singleShot(500, self.close)

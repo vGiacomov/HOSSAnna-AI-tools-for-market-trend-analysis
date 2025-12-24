@@ -1,3 +1,15 @@
+
+languagesList ={
+    "English",
+    "Polski",
+    "Français",
+    "Deutsch",
+    "Español",
+    "Italiano",
+    "עברית",
+}
+
+
 TRANSLATIONS = {
     "English": {
         "select_language": "Select Language",
@@ -36,18 +48,6 @@ TRANSLATIONS = {
         "theme_info": "Choisissez un thème et confirmez avec le bouton 'Suivant'.",
     },
 
-    "עברית": {
-        "select_language": "בחר שפה",
-        "next": "הבא →",
-        "back": "← חזרה",
-        "select_theme": "בחר ערכת נושא",
-        "terms_title": "תנאי שימוש",
-        "terms_scroll_info": "גלול עד הסוף כדי לאפשר אישור",
-        "terms_accept": "✓ קראתי ואני מאשר את תנאי השימוש",
-        "setup_done": "ההגדרה הסתיימה!",
-        "finish": "סיים הגדרה",
-        "theme_info": "בחר ערכת נושא ואשר באמצעות כפתור 'הבא'."
-    },
     "Deutsch": {
         "select_language": "Sprache auswählen",
         "next": "Weiter →",
@@ -83,5 +83,18 @@ TRANSLATIONS = {
         "setup_done": "Configurazione completata!",
         "finish": "Termina configurazione",
         "theme_info": "Scegli un tema e conferma con il pulsante 'Avanti'.",
-    }
+    },
+
+    "עברית": {
+        "select_language": "בחר שפה",
+        "next": "הבא →",
+        "back": "← חזרה",
+        "select_theme": "בחר ערכת נושא",
+        "terms_title": "תנאי שימוש",
+        "terms_scroll_info": "גלול עד הסוף כדי לאפשר אישור",
+        "terms_accept": "✓ קראתי ואני מאשר את תנאי השימוש",
+        "setup_done": "ההגדרה הסתיימה!",
+        "finish": "סיים הגדרה",
+        "theme_info": "בחר ערכת נושא ואשר באמצעות כפתור 'הבא'."
+    },
 }

@@ -83,7 +83,7 @@ class MarketWorker(QThread):
             return
         try:
             tickers_str = " ".join(self.tickers)
-            df = yf.download(tickers_str, period="2d", interval="1d", progress=False)
+            df = yf.download(tickers_str, period="30d", interval="1d", progress=False)
             data = {}
             if not df.empty:
                 if "Close" in df:

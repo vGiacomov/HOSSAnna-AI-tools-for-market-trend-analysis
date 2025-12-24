@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
-from Launcher.Launcher import LauncherWindow, NetworkCheck
+from Launcher.Launcher import LauncherWindow
 from Launcher.SetupWizard import SetupWizard
 from App.mainPage import MainWindow
 import os
@@ -60,7 +60,8 @@ tf.get_logger().setLevel("ERROR")
 
 class InitialSettings:
     def __init__(self):
-        self.appFolderPath = Path(os.getenv('APPDATA')) / 'HOSSANNA'
+        self.appName = "HOSSAnna"
+        self.appFolderPath = Path(os.getenv('APPDATA')) / self.appName
 
         self.isAdmin = False
         self.isConfig = False
@@ -82,10 +83,8 @@ class InitialSettings:
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("Icons/Logo.ico"))
-
-    # InitialSettings
     settings = InitialSettings()
-    print(settings.appFolderPath)
+
     # Launcher
     launcher = LauncherWindow(settings)
     launcher.show()
@@ -93,13 +92,17 @@ if __name__ == "__main__":
 
     # Open Setup Wizard if first start
     if not settings.isConfig:
-        setupWizard = SetupWizard(settings.appFolderPath)
+        setupWizard = SetupWizard(settings.appFolderPath, settings.appName)
         setupWizard.show()
         app.exec()
 
     Aplication = MainWindow()
     Aplication.show()
     app.exec()
+
+    print(settings.isConfig)
+    print(settings.isNetwork)
+    print(settings.isAdmin)
 
     sys.exit(0)
 
