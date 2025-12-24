@@ -7,18 +7,19 @@ from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from pathlib import Path
 from PySide6.QtCore import QFile, QIODevice, QTextStream
+from playhouse.sqlite_udf import setting
 
 from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
 from Launcher.translations import TRANSLATIONS
+from Launcher.TermsOfUse import TOU
 
 
 class ConfigManager:
     @staticmethod
-    def create_appdata_structure():
-        appdata_path = os.getenv('APPDATA')
-        if not appdata_path:
+    def create_appdata_structure(appFolderPath):
+        if not appFolderPath:
             return False
-        base_path = Path(appdata_path) / 'GPCtools'
+        base_path = appFolderPath
         configs_path = base_path / 'Configs'
         logs_path = base_path / 'logs'
         try:
@@ -29,11 +30,10 @@ class ConfigManager:
             return False
 
     @staticmethod
-    def save_config(language, theme, terms_accepted):
-        appdata_path = os.getenv('APPDATA')
-        if not appdata_path:
+    def save_config(language, theme, terms_accepted,appFolderPath):
+        if not appFolderPath:
             return False
-        config_path = Path(appdata_path) / 'GPCtools' / 'Configs' / 'config.txt'
+        config_path = appFolderPath / 'Configs' / 'config.txt'
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(f"language={language}\n")
@@ -47,9 +47,10 @@ class ConfigManager:
 class SetupWizard(QWidget):
     finished = Signal()
 
-    def __init__(self):
+    def __init__(self, appFolderPath):
         super().__init__()
 
+        self.appFolderPath = appFolderPath
         # default values
         self.selected_language = "English"
         self.selected_theme = "light"
@@ -264,17 +265,16 @@ class SetupWizard(QWidget):
     # -------------------------
     # Helper functions
     # -------------------------
-    def load_terms_from_file(self):
-        file = QFile(":/Launcher/terms/terms.txt")
-        if not file.open(QIODevice.ReadOnly | QIODevice.Text):
+    def load_terms_from_file(self, file_path="Launcher/terms.txt"):
+        try:
+            content = TOU.Load_TOU()
+            return content
+        except FileNotFoundError:
+            print(f"Nie znaleziono pliku: {file_path}")
             return None
-
-        stream = QTextStream(file)
-        stream.setEncoding("UTF-8")
-        content = stream.readAll()
-        file.close()
-        return content
-
+        except Exception as e:
+            print(f"Błąd podczas otwierania pliku: {e}")
+            return None
 
     def check_scroll_position_on_load(self):
         QTimer.singleShot(100, self.check_scroll_position)
@@ -378,11 +378,12 @@ class SetupWizard(QWidget):
             final_buttons[0].setText(tr.get("finish", "Finish Setup"))
 
     def finish_setup(self):
-        ConfigManager.create_appdata_structure()
+        ConfigManager.create_appdata_structure(self.appFolderPath)
         ConfigManager.save_config(
             self.selected_language,
             self.selected_theme,
-            self.terms_accepted
+            self.terms_accepted,
+            self.appFolderPath
         )
         self.finished.emit()
         self.close()

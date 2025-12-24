@@ -1,12 +1,11 @@
 import sys
 import ctypes
 import os
+import socket
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QProgressBar
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPixmap
 from pathlib import Path
-import socket
-
 
 
 class AdminCheck:
@@ -22,28 +21,31 @@ class AdminCheck:
             return os.geteuid() == 0
 
 
+
 class NetworkCheck:
     @staticmethod
-    def check_network_connection(timeout=2):
+    def check_network_connection(host="8.8.8.8", port=53, timeout=2):
+
         try:
-            socket.create_connection(("8.8.8.8", 53), timeout=timeout)
-            return True
-        except OSError:
+            with socket.create_connection((host, port), timeout=timeout) as conn:
+                return True
+        except socket.timeout:
             return False
+        except OSError as e:
+            return False
+
 
 
 class FirstStartCheck():
     @staticmethod
-    def check_first_start():
-        appdata_path = os.getenv('APPDATA')
-        if appdata_path:
-            config_path = Path(appdata_path) / 'GPCtools' / 'Configs' / 'config.txt'
+    def check_first_start(appFolderPath):
+        if appFolderPath:
+            config_path = appFolderPath  / 'Configs' / 'config.txt'
 
             if config_path.is_file():
                 return True
             else:
                 return False
-
         else:
             return False
 
@@ -117,27 +119,27 @@ class LauncherWindow(QWidget):
 
     def check_admin(self):
         self.status_label.setText("Checking permissions...")
-        self.settings.adminPermission = AdminCheck.check_admin_permission()
-        print("Admin:", self.settings.adminPermission)
-
+        self.settings.set_admin_value(
+            AdminCheck.check_admin_permission()
+        )
         self.update_progress()
         QTimer.singleShot(800, self.check_network)
 
     def check_network(self):
         self.status_label.setText("Checking network connection...")
-        self.settings.networkConnection = NetworkCheck.check_network_connection()
-        print("Network:", self.settings.networkConnection)
-
+        self.settings.set_network_value(
+            NetworkCheck.check_network_connection()
+        )
         self.update_progress()
         QTimer.singleShot(1000, self.check_first_start)
 
     def check_first_start(self):
         self.status_label.setText("Checking the configuration...")
-        self.settings.firstStart = FirstStartCheck.check_first_start()
-        print("First start:", self.settings.firstStart)
-
+        self.settings.set_first_start_value(
+            FirstStartCheck.check_first_start(self.settings.appFolderPath)
+        )
         self.update_progress()
-        QTimer.singleShot(1200, self.finish_loading)
+        QTimer.singleShot(1500, self.finish_loading)
 
     def update_progress(self):
         self.current_step += 1
@@ -145,10 +147,13 @@ class LauncherWindow(QWidget):
         self.progress_bar.setValue(progress_value)
 
     def finish_loading(self):
-        if self.settings.firstStart:
+        if self.settings.isConfig:
             self.status_label.setText("Preparing Setup Configurator")
         else:
             self.status_label.setText("Preparing App")
 
         self.progress_bar.setValue(100)
         QTimer.singleShot(500, self.close)
+
+    def return_values(self):
+        return self.settings

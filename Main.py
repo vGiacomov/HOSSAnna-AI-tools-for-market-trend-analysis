@@ -13,7 +13,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QThread, Signal, QUrl, QStandardPaths
 from PySide6.QtGui import QDesktopServices, QIcon, QPixmap
-
+import sys
+from pathlib import Path
 from App.app_state import AppState
 from App.translations import TRANSLATIONS
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
@@ -37,7 +38,7 @@ from App.translations import TRANSLATIONS
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
 
 
-import sys
+
 
 class DummyStream:
     def write(self, *args, **kwargs): pass
@@ -57,14 +58,24 @@ tf.get_logger().setLevel("ERROR")
 
 
 
-
-
-
 class InitialSettings:
     def __init__(self):
-        self.adminPermission = False
-        self.firstStart = True
-        self.NetworkCheck = False
+        self.appFolderPath = Path(os.getenv('APPDATA')) / 'HOSSANNA'
+
+        self.isAdmin = False
+        self.isConfig = False
+        self.isNetwork = False
+
+    def set_admin_value(self, value: bool):
+        self.isAdmin = value
+
+    def set_first_start_value(self, value: bool):
+        self.isConfig = value
+
+    def set_network_value(self, value: bool):
+        self.isNetwork = value
+
+
 
 
 
@@ -74,22 +85,17 @@ if __name__ == "__main__":
 
     # InitialSettings
     settings = InitialSettings()
-
+    print(settings.appFolderPath)
     # Launcher
     launcher = LauncherWindow(settings)
     launcher.show()
     app.exec()
 
-    print(settings.adminPermission)
-    print(settings.firstStart)
-    print(settings.NetworkCheck)
-
     # Open Setup Wizard if first start
-    if not settings.firstStart:
-        setupWizard = SetupWizard()
+    if not settings.isConfig:
+        setupWizard = SetupWizard(settings.appFolderPath)
         setupWizard.show()
         app.exec()
-
 
     Aplication = MainWindow()
     Aplication.show()
