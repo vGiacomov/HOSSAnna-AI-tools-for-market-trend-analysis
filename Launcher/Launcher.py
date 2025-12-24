@@ -68,7 +68,8 @@ class LauncherWindow(QWidget):
 
         # Logo
         self.logo_label = QLabel()
-        pixmap = QPixmap('Launcher/Icons/Logo.png')
+
+        pixmap = QPixmap(':/Launcher/Icons/Logo.png')
         if not pixmap.isNull():
             scaled_pixmap = pixmap.scaled(400, 300, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             self.logo_label.setPixmap(scaled_pixmap)
@@ -79,7 +80,7 @@ class LauncherWindow(QWidget):
         layout.addWidget(self.logo_label)
 
         # Status label
-        self.status_label = QLabel("Inicjalizacja...")
+        self.status_label = QLabel("Initialization...")
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("font-size: 14px; color: #666; margin: 20px;")
         layout.addWidget(self.status_label)
@@ -106,15 +107,10 @@ class LauncherWindow(QWidget):
         layout.addWidget(self.progress_bar)
 
         self.setLayout(layout)
-
-        # Stylowanie okna
-        self.setStyleSheet("""
-            QWidget {
-                background-color: white;
-            }
-        """)
+        self.setStyleSheet("""QWidget {background-color: white;}""")
 
         QTimer.singleShot(500, self.start_checks)
+
 
     def start_checks(self):
         self.check_admin()
@@ -122,34 +118,34 @@ class LauncherWindow(QWidget):
     def check_admin(self):
         self.status_label.setText("Checking permissions...")
         self.settings.adminPermission = AdminCheck.check_admin_permission()
+        print("Admin:", self.settings.adminPermission)
 
-        self.current_step += 1
         self.update_progress()
         QTimer.singleShot(800, self.check_network)
 
     def check_network(self):
         self.status_label.setText("Checking network connection...")
         self.settings.networkConnection = NetworkCheck.check_network_connection()
-        self.current_step += 1
+        print("Network:", self.settings.networkConnection)
+
         self.update_progress()
         QTimer.singleShot(1000, self.check_first_start)
 
     def check_first_start(self):
         self.status_label.setText("Checking the configuration...")
         self.settings.firstStart = FirstStartCheck.check_first_start()
+        print("First start:", self.settings.firstStart)
 
-        self.current_step += 1
         self.update_progress()
-
         QTimer.singleShot(1200, self.finish_loading)
 
-
     def update_progress(self):
+        self.current_step += 1
         progress_value = int((self.current_step / self.total_steps) * 100)
         self.progress_bar.setValue(progress_value)
 
     def finish_loading(self):
-        if FirstStartCheck() == True:
+        if self.settings.firstStart:
             self.status_label.setText("Preparing Setup Configurator")
         else:
             self.status_label.setText("Preparing App")

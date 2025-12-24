@@ -2,57 +2,14 @@
 import os
 from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QComboBox, QPushButton,
-    QHBoxLayout, QTextEdit, QCheckBox, QApplication, QStackedWidget
-)
+    QHBoxLayout, QTextEdit, QCheckBox, QApplication, QStackedWidget)
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from pathlib import Path
 from PySide6.QtCore import QFile, QIODevice, QTextStream
 
-# import tematów
-try:
-    from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
-except Exception:
-    LIGHT_THEME = {
-        "main": "QWidget { background-color: white; font-family: 'Segoe UI', Arial, sans-serif; }",
-        "combobox": "",
-        "theme_switch": "",
-        "checkbox_accept": "",
-        "textedit": "",
-        "finish_button": "",
-    }
-    DARK_THEME = LIGHT_THEME
-
-# import tłumaczeń
-try:
-    from Launcher.translations import TRANSLATIONS
-except Exception:
-    TRANSLATIONS = {
-        "English": {
-            "select_language": "Select Language",
-            "next": "Next →",
-            "back": "← Back",
-            "select_theme": "Select Theme",
-            "terms_title": "Terms of Use",
-            "terms_scroll_info": "Scroll to the end to unlock the acceptance checkbox.",
-            "terms_accept": "✓ I have read and accept the terms",
-            "setup_done": "Setup Completed!",
-            "finish": "Finish Setup",
-            "theme_info": "Choose a theme and confirm with the 'Next' button.",
-        },
-        "Polski": {
-            "select_language": "Wybierz język / Select Language",
-            "next": "Dalej →",
-            "back": "← Wstecz",
-            "select_theme": "Wybierz motyw",
-            "terms_title": "Warunki użytkowania",
-            "terms_scroll_info": "Przewiń do końca, aby odblokować akceptację warunków.",
-            "terms_accept": "✓ Przeczytałem i akceptuję warunki użytkowania",
-            "setup_done": "Konfiguracja zakończona!",
-            "finish": "Zakończ konfigurację",
-            "theme_info": "Wybierz motyw i potwierdź przyciskiem 'Dalej'.",
-        }
-    }
+from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
+from Launcher.translations import TRANSLATIONS
 
 
 class ConfigManager:
@@ -93,14 +50,14 @@ class SetupWizard(QWidget):
     def __init__(self):
         super().__init__()
 
-        # domyślne wartości
+        # default values
         self.selected_language = "English"
         self.selected_theme = "light"
         self.terms_accepted = False
         self.scrolled_to_bottom = False
         self._widgets_to_style = {}
 
-        # okno
+        # UI
         self.resize(720, 480)
         self.setFixedSize(720, 480)
         self.setWindowTitle("Setup Wizard")
@@ -109,10 +66,8 @@ class SetupWizard(QWidget):
         self.main_layout.setContentsMargins(50, 30, 50, 30)
         self.stacked_widget = QStackedWidget()
 
-        # ustaw domyślny motyw
         self.theme = LIGHT_THEME if self.selected_theme == "light" else DARK_THEME
 
-        # Tworzenie kroków
         self.create_language_step()
         self.create_theme_step()
         self.create_terms_step()
@@ -310,18 +265,16 @@ class SetupWizard(QWidget):
     # Helper functions
     # -------------------------
     def load_terms_from_file(self):
-        file = QFile("Launcher/terms.txt")
-        if file.exists():
-            try:
-                if file.open(QIODevice.ReadOnly | QIODevice.Text):
-                    stream = QTextStream(file)
-                    content = stream.readAll()
-                    file.close()
-                    return content
-            except Exception:
-                file.close()
-                return None
-        return None
+        file = QFile(":/Launcher/terms/terms.txt")
+        if not file.open(QIODevice.ReadOnly | QIODevice.Text):
+            return None
+
+        stream = QTextStream(file)
+        stream.setEncoding("UTF-8")
+        content = stream.readAll()
+        file.close()
+        return content
+
 
     def check_scroll_position_on_load(self):
         QTimer.singleShot(100, self.check_scroll_position)

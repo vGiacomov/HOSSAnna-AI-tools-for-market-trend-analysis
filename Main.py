@@ -43,24 +43,21 @@ class DummyStream:
     def write(self, *args, **kwargs): pass
     def flush(self): pass
 
+
 if getattr(sys, "frozen", False):
     if sys.stdout is None:
         sys.stdout = DummyStream()
     if sys.stderr is None:
         sys.stderr = DummyStream()
 
-import os
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # przed import tensorflow
-
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow as tf
 tf.get_logger().setLevel("ERROR")
 
 
 
-from PySide6.QtCore import QDir
-print("Załadowane zasoby:")
-for resource in QDir(":/").entryList():
-    print(f"  :/{resource}")
+
+
 
 
 class InitialSettings:
@@ -70,15 +67,13 @@ class InitialSettings:
         self.NetworkCheck = False
 
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("Icons/Logo.ico"))
 
     # InitialSettings
     settings = InitialSettings()
-
-
-
 
     # Launcher
     launcher = LauncherWindow(settings)
