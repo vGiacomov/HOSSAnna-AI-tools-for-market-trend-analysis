@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from pathlib import Path
 from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
-from Launcher.translations import languagesList, TRANSLATIONS
+from Launcher.Launcher_translations import languagesList, TRANSLATIONS
 from Launcher.TermsOfUse import TOU
 
 
@@ -40,7 +40,6 @@ class ConfigManager:
                        f"terms_accepted={terms_accepted}\n")
             return True
         except (OSError, IOError) as e:
-            print(f"Error saving config: {e}")
             return False
 
 

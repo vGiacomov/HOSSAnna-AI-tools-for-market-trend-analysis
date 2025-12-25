@@ -96,7 +96,7 @@ if __name__ == "__main__":
         setupWizard.show()
         app.exec()
 
-    Aplication = MainWindow()
+    Aplication = MainWindow(settings)
     Aplication.show()
     app.exec()
 

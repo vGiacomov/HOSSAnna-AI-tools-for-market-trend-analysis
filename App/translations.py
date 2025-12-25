@@ -1,4 +1,13 @@
-# App/translations.py
+
+languagesList ={
+    "English",
+    "Polski",
+    "Français",
+    "Deutsch",
+    "Español",
+    "Italiano",
+    "עברית",
+}
 
 TRANSLATIONS = {
     "English": {
