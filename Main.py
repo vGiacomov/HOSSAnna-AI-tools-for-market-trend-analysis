@@ -62,6 +62,7 @@ class InitialSettings:
     def __init__(self):
         self.appName = "HOSSAnna"
         self.appFolderPath = Path(os.getenv('APPDATA')) / self.appName
+        self.configPath = self.appFolderPath /'Configs' / 'config.txt'
 
         self.isAdmin = False
         self.isConfig = False
@@ -100,9 +101,6 @@ if __name__ == "__main__":
     Aplication.show()
     app.exec()
 
-    print(settings.isConfig)
-    print(settings.isNetwork)
-    print(settings.isAdmin)
 
     sys.exit(0)
 

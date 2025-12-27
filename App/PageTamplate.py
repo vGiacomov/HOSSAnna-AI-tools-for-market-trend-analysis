@@ -2,14 +2,11 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel,
-    QGridLayout, QScrollArea, QLineEdit, QComboBox, QSizePolicy
-)
-# Usunięto import z App.Styles, skoro go nie masz lub nie chcesz używać
+    QGridLayout, QScrollArea, QLineEdit, QComboBox, QSizePolicy)
 from App.app_state import AppState
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
 
 
-# --- Helpery ---
 
 def tr_dynamic(key):
     from App.translations import TRANSLATIONS
@@ -26,8 +23,6 @@ def get_theme_style(style_key):
 # --- Inteligentne Widgety ---
 
 class SmartGroupBox(QGroupBox):
-    """Ramka, która zmienia swój styl (kolor obramowania) przy zmianie motywu."""
-
     def __init__(self):
         super().__init__()
         AppState.state_changed.connect(self.update_ui)
@@ -119,7 +114,7 @@ class ModuleTab(QScrollArea):
 
         if layout_type == "top_bottom_split":
             section_layout = QVBoxLayout(section)
-            section_layout.setSpacing(15)  # Odstęp między górą a dołem
+            section_layout.setSpacing(15)
             section_layout.setContentsMargins(5, 5, 5, 5)
 
             # 1. Top Panel (Wykres)

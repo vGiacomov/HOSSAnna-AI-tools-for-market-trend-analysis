@@ -1,7 +1,12 @@
 import resources_rc
-import os
 
-from pathlib import Path
+from App.Pages.Prediction import get_program_data
+from App.PageTamplate import ModuleTab
+from App.themes import LIGHT_THEME, DARK_THEME
+from App.app_state import AppState
+from App.translations import TRANSLATIONS, languagesList
+from App.Pages.HomePage import get_program_data as get_home_data
+
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QPushButton, QHBoxLayout,
@@ -9,50 +14,28 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QPushButton, QHBoxLayout,
                                QMainWindow, QWidget, QStackedWidget, QComboBox,
                                QCheckBox)
 
-from App.Pages.Prediction import get_program_data
-from App.PageTamplate import ModuleTab
-from App.TabTemplate import ModuleTabContainer
-from App.themes import LIGHT_THEME, DARK_THEME
-from App.app_state import AppState
-from App.translations import TRANSLATIONS, languagesList
-from App.Pages.HomePage import get_program_data as get_home_data
-
 
 class ConfigManager:
-    @staticmethod
-    def get_config_path():
-        appdata_path = os.getenv('APPDATA')
-        return Path(appdata_path) / 'GPCtools' / 'Configs' / 'config.txt' if appdata_path else None
+    def __init__(self, initial_settings):
+        self.initial_settings = initial_settings
+        self.config_path = initial_settings.configPath
+        self.app_folder_path = initial_settings.appFolderPath
 
-    @staticmethod
-    def create_appdata_structure():
-        appdata_path = os.getenv('APPDATA')
-        if not appdata_path:
-            return False
 
-        try:
-            base_path = Path(appdata_path) / 'GPCtools'
-            (base_path / 'Configs').mkdir(parents=True, exist_ok=True)
-            (base_path / 'logs').mkdir(parents=True, exist_ok=True)
-            return True
-        except Exception:
-            return False
+    def load_config(self):
 
-    @staticmethod
-    def load_config():
-        config_path = ConfigManager.get_config_path()
         default_config = {
             "language": "English",
             "theme": "light",
             "terms_accepted": False
         }
 
-        if not config_path or not config_path.exists():
+        if not self.config_path.exists():
             return default_config
 
         try:
             config = {}
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, 'r', encoding='utf-8') as f:
                 for line in f:
                     if '=' in line.strip():
                         key, value = line.strip().split('=', 1)
@@ -66,15 +49,10 @@ class ConfigManager:
         except Exception:
             return default_config
 
-    @staticmethod
-    def save_config(language, theme):
-        config_path = ConfigManager.get_config_path()
-        if not config_path:
-            return False
-
+    def save_config(self, language, theme):
         try:
-            config_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(config_path, 'w', encoding='utf-8') as f:
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.config_path, 'w', encoding='utf-8') as f:
                 f.write(f"language={language}\n"
                         f"theme={theme}\n")
             return True
@@ -86,6 +64,7 @@ class SettingsWindow(QDialog, AppState):
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
+        self.config_manager = main_window.config_manager
         self.current_language = main_window.current_language
         self.current_theme = main_window.current_theme
 
@@ -220,7 +199,7 @@ class SettingsWindow(QDialog, AppState):
             self.theme_checkbox.setStyleSheet(theme.get("theme_switch", ""))
 
     def apply_settings(self):
-        if ConfigManager.save_config(self.current_language, self.current_theme):
+        if self.config_manager.save_config(self.current_language, self.current_theme):
             AppState.set_language(self.current_language)
             AppState.set_theme(self.current_theme)
 
@@ -308,7 +287,9 @@ class MainWindow(QMainWindow, AppState):
     def __init__(self, initialSettings):
         super().__init__()
 
-        config = ConfigManager.load_config()
+        self.config_manager = ConfigManager(initialSettings)
+        config = self.config_manager.load_config()
+
         self.current_language = config["language"]
         self.current_theme = config["theme"]
         self.initialSettings = initialSettings
@@ -325,7 +306,6 @@ class MainWindow(QMainWindow, AppState):
         self.apply_theme(self.current_theme)
 
     def _init_ui(self):
-
         buttons_config = [
             {
                 "name": "home",
@@ -372,7 +352,12 @@ class MainWindow(QMainWindow, AppState):
     def change_tab(self, index):
         self.stacked_widget.setCurrentIndex(index)
 
-    def show_module_tab(self, tab_type, title, modules_config):
+    def open_settings(self):
+        SettingsWindow(self).exec()
+
+    """ 
+    # not use in this project only as backup to not forger. I will remove it later
+    def show_module_tab(self, tab_type, title, modules_config):    
         if tab_type in self.module_tabs:
             tab = self.module_tabs[tab_type]
             tab.reset_to_main_page()
@@ -383,6 +368,4 @@ class MainWindow(QMainWindow, AppState):
 
         self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(tab))
         self.current_module_type = tab_type
-
-    def open_settings(self):
-        SettingsWindow(self).exec()
+"""

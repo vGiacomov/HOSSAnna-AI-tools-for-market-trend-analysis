@@ -5,152 +5,232 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import mplfinance as mpf
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox,
-    QLabel, QSizePolicy, QFrame, QLineEdit, QComboBox, QPushButton
+    QVBoxLayout, QHBoxLayout, QGridLayout, QMessageBox, QSizePolicy
 )
 from PySide6.QtCore import QThread, Signal, Qt
 
-from App.app_state import AppState
-from App.translations import TRANSLATIONS
-from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
+from App.theme_system import ( ThemeManager, AutoRefreshWidget, SmartLabel,
+                               SmartButton, SmartLineEdit, SmartComboBox, LayoutHelper)
 
 
 
-def get_tr(key):
-    lang = AppState.get_language()
-    return TRANSLATIONS.get(lang, {}).get(key, key)
+PREDICTION_RANGES = {
+    "5m": {"period": "2d", "interval": "5m", "dt_format": "%H:%M", "tail": 80},
+    "15m": {"period": "3d", "interval": "15m", "dt_format": "%H:%M", "tail": 80},
+    "1h": {"period": "2wk", "interval": "60m", "dt_format": "%H:%M", "tail": 80},
+    "1d": {"period": "3mo", "interval": "1d", "dt_format": "%Y-%m-%d", "tail": 80},
+    "7d": {"period": "1y", "interval": "1wk", "dt_format": "%Y-%m-%d", "tail": 80},
+    "30d": {"period": "5y", "interval": "1mo", "dt_format": "%Y-%m-%d", "tail": 80},
+}
 
 
-def get_theme_cfg():
-    return DARK_THEME if AppState.get_theme() == "dark" else LIGHT_THEME
+class StockPricePredictor:
+
+    def __init__(self, config=None):
+        self.config = {
+        "units": 64,
+        "epochs": 20,
+        "batch_size": 32,
+        "train_split": 0.8,
+        "min_seq_len": 30,
+        }
 
 
-def get_style_str(theme, key):
-    # Prosta funkcja wyciągająca styl ze słownika motywu
-    val = theme.get(key, "")
-    if isinstance(val, dict):
-        return val.get("style", "")
-    return val
+        self.scaler = MinMaxScaler()
+        self.model = None
+        self.accuracy_metrics = {}
+
+    def prepare_data(self, df):
+        scaled = self.scaler.fit_transform(df[["Close"]])
+        seq_len = min(self.config["min_seq_len"], len(scaled) // 3)
+
+        X, y = [], []
+        for i in range(len(scaled) - seq_len):
+            X.append(scaled[i:i + seq_len])
+            y.append(scaled[i + seq_len])
+
+        X, y = np.array(X), np.array(y)
+        train_size = int(len(X) * self.config["train_split"])
+
+        return X[:train_size], y[:train_size], X[train_size:], y[train_size:], seq_len, scaled
+
+    def build_model(self, seq_len):
+        self.model = Sequential([
+            LSTM(self.config["units"], return_sequences=False, input_shape=(seq_len, 1)),
+            Dense(1)
+        ])
+        self.model.compile(optimizer="adam", loss="mse")
+
+    def train(self, X_train, y_train):
+        self.model.fit(
+            X_train, y_train,
+            epochs=self.config["epochs"],
+            batch_size=self.config["batch_size"],
+            verbose=0
+        )
+
+    def calculate_accuracy(self, X_test, y_test):
+        if len(X_test) == 0:
+            return {"accuracy": 0.0, "rmse": 0.0, "mape": 0.0}
+
+        predictions = self.model.predict(X_test, verbose=0)
+
+        y_test_actual = self.scaler.inverse_transform(y_test)
+        predictions_actual = self.scaler.inverse_transform(predictions)
 
 
-# --- Background Worker ---
+        rmse = np.sqrt(mean_squared_error(y_test_actual, predictions_actual))
+        mape = mean_absolute_percentage_error(y_test_actual, predictions_actual) * 100
+
+        accuracy = max(0, 100 - mape)
+
+        self.accuracy_metrics = {
+            "accuracy": accuracy,
+            "rmse": rmse,
+            "mape": mape
+        }
+
+        return self.accuracy_metrics
+
+    def predict_next(self, scaled_data, seq_len):
+        last_seq = scaled_data[-seq_len:].reshape(1, seq_len, 1)
+        pred_scaled = self.model.predict(last_seq, verbose=0)
+        return self.scaler.inverse_transform(pred_scaled)[0][0]
+
+
 
 class PredictionWorker(QThread):
     finished = Signal(dict)
     error = Signal(str)
     progress = Signal(str)
 
+    REQUIRED_COLUMNS = ["Open", "High", "Low", "Close", "Volume"]
+    MIN_DATA_POINTS = 30
+
     def __init__(self, symbol, period, interval):
         super().__init__()
         self.symbol = symbol
         self.period = period
         self.interval = interval
+        self.predictor = StockPricePredictor()
+
+    def fetch_and_validate(self):
+        df = yf.download(self.symbol, period=self.period, interval=self.interval)
+
+        if df.empty:
+            raise ValueError(f"No data for {self.symbol}")
+
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = [c[0] for c in df.columns]
+
+        for col in self.REQUIRED_COLUMNS:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+
+        df = df.dropna()
+
+        if len(df) < self.MIN_DATA_POINTS:
+            raise ValueError(f"Insufficient data (need at least {self.MIN_DATA_POINTS} points)")
+
+        return df
+
+    def get_company_name(self):
+        try:
+            ticker = yf.Ticker(self.symbol)
+            info = ticker.info
+            return info.get('longName', info.get('shortName', self.symbol.upper()))
+        except:
+            return self.symbol.upper()
 
     def run(self):
         try:
             self.progress.emit("loading")
-            df = yf.download(self.symbol, period=self.period, interval=self.interval)
-            if df.empty: raise ValueError(f"No data for {self.symbol}")
+            df = self.fetch_and_validate()
 
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = [c[0] for c in df.columns]
-
-            for col in ["Open", "High", "Low", "Close", "Volume"]:
-                if col in df.columns: df[col] = pd.to_numeric(df[col], errors="coerce")
-
-            df = df.dropna()
-            if len(df) < 50: raise ValueError("Insufficient data")
+            company_name = self.get_company_name()
 
             self.progress.emit("calculating")
-            scaler = MinMaxScaler()
-            scaled = scaler.fit_transform(df[["Close"]])
-            seq_len = min(30, len(scaled) // 3)
+            X_train, y_train, X_test, y_test, seq_len, scaled = self.predictor.prepare_data(df)
 
-            X, y = [], []
-            for i in range(len(scaled) - seq_len):
-                X.append(scaled[i:i + seq_len])
-                y.append(scaled[i + seq_len])
-
-            X, y = np.array(X), np.array(y)
-            train_size = int(len(X) * 0.8)
-
-            model = Sequential([
-                LSTM(64, return_sequences=False, input_shape=(seq_len, 1)),
-                Dense(1)
-            ])
-            model.compile(optimizer="adam", loss="mse")
-            model.fit(X[:train_size], y[:train_size], epochs=20, batch_size=32, verbose=0)
-
-            last_seq = scaled[-seq_len:].reshape(1, seq_len, 1)
-            pred_scaled = model.predict(last_seq, verbose=0)
-            next_price = scaler.inverse_transform(pred_scaled)[0][0]
+            self.predictor.build_model(seq_len)
+            self.predictor.train(X_train, y_train)
+            accuracy_metrics = self.predictor.calculate_accuracy(X_test, y_test)
+            next_price = self.predictor.predict_next(scaled, seq_len)
             current_price = df["Close"].iloc[-1]
 
             self.finished.emit({
                 "df": df,
                 "next_price": next_price,
                 "current_price": current_price,
-                "symbol": self.symbol
+                "symbol": self.symbol,
+                "company_name": company_name,  # Dodane!
+                "accuracy": accuracy_metrics["accuracy"],
+                "rmse": accuracy_metrics["rmse"],
+                "mape": accuracy_metrics["mape"]
             })
+
         except Exception as e:
             self.error.emit(str(e))
 
-
 # --- Custom Widgety ---
 
-class PlaceholderWidget(QWidget):
+class PlaceholderWidget(AutoRefreshWidget):
+
     def __init__(self):
         super().__init__()
+        self._setup_ui()
+
+    def _setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignCenter)
-        self.label = QLabel()
-        self.label.setAlignment(Qt.AlignCenter)
+
+        self.label = SmartLabel(
+            tr_key="placeholder_message",
+            alignment="center"
+        )
         layout.addWidget(self.label)
-        AppState.state_changed.connect(self.refresh_ui)
-        self.refresh_ui()
-
-    def refresh_ui(self):
-        self.label.setText(get_tr("placeholder_message"))
-        theme = get_theme_cfg()
-        style = theme.get("placeholder", {}).get("text_style", "")
-        self.label.setStyleSheet(style)
 
 
-class ChartWidget(QWidget):
+class ChartWidget(AutoRefreshWidget):
     def __init__(self):
         super().__init__()
-        self.chart_cfg = get_theme_cfg().get("chart", {})
+        self.chart_cfg = ThemeManager.get_current_theme().get("chart", {})
+        self._setup_canvas()
+        self.hide()
+
+    def _setup_canvas(self):
         self.figure = Figure(facecolor=self.chart_cfg.get("bg_color", "white"))
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         layout.addWidget(self.canvas)
-        self.hide()
-        AppState.state_changed.connect(self.refresh_ui)
 
-    def refresh_ui(self):
-        theme = get_theme_cfg()
-        self.chart_cfg = theme.get("chart", {})
+    def _refresh_content(self):
+        self.chart_cfg = ThemeManager.get_current_theme().get("chart", {})
         self.figure.patch.set_facecolor(self.chart_cfg.get("bg_color", "white"))
-        if self.isVisible(): self.canvas.draw()
+        if self.isVisible():
+            self.canvas.draw()
 
     def update_chart(self, df, next_price, selected_range="15m"):
         self.figure.clear()
-        df_plot = df.tail(80).copy()
+
+        range_config = PREDICTION_RANGES.get(selected_range, PREDICTION_RANGES["15m"])
+        df_plot = df.tail(range_config["tail"]).copy()
         df_plot["Prediction"] = np.nan
         df_plot.iloc[-1, df_plot.columns.get_loc("Prediction")] = next_price
-        theme_cfg = get_theme_cfg()
+
         cfg = self.chart_cfg
-        style_config = cfg.get("mpf_style_config", {})
-        dt_format = '%H:%M' if selected_range in ["5m", "15m", "1h"] else '%Y-%m-%d'
 
         try:
             ax = self.figure.add_axes([0.05, 0.05, 0.97, 0.99])
+
             mc = mpf.make_marketcolors(
                 up=cfg.get("mpf_colors", {}).get("up", "#00aa00"),
                 down=cfg.get("mpf_colors", {}).get("down", "#cc0000"),
@@ -158,6 +238,8 @@ class ChartWidget(QWidget):
                 edge=cfg.get("mpf_colors", {}).get("edge", "#333"),
                 volume=cfg.get("mpf_colors", {}).get("volume", "in"),
             )
+
+            style_config = cfg.get("mpf_style_config", {})
             style = mpf.make_mpf_style(
                 base_mpf_style=cfg.get("mpf_style_base", "yahoo"),
                 marketcolors=mc,
@@ -168,239 +250,380 @@ class ChartWidget(QWidget):
                 figcolor=style_config.get("figcolor", "white"),
                 y_on_right=False
             )
+
             add_plot = mpf.make_addplot(
-                df_plot["Prediction"], scatter=True,
+                df_plot["Prediction"],
+                scatter=True,
                 markersize=cfg.get("prediction_marker", {}).get("size", 200),
                 marker=cfg.get("prediction_marker", {}).get("marker", "*"),
-                color=cfg.get("prediction_color", "gold"), ax=ax,
+                color=cfg.get("prediction_color", "gold"),
+                ax=ax,
             )
+
             mpf.plot(
                 df_plot, type="candle", style=style, ylabel="", xrotation=0,
-                datetime_format=dt_format, addplot=add_plot, volume=False, ax=ax, tight_layout=False
+                datetime_format=range_config["dt_format"], addplot=add_plot,
+                volume=False, ax=ax, tight_layout=False
             )
+
             axis_color = style_config.get("edgecolor", "black")
             ax.tick_params(axis='x', colors=axis_color)
             ax.tick_params(axis='y', colors=axis_color)
-            for spine in ax.spines.values(): spine.set_edgecolor(axis_color)
+            for spine in ax.spines.values():
+                spine.set_edgecolor(axis_color)
+
             self.figure.subplots_adjust(0, 0, 1, 1)
             self.figure.patch.set_facecolor(cfg.get("bg_color", "white"))
             self.canvas.draw()
             self.show()
+
         except Exception as e:
             print(f"Chart error: {e}")
 
 
-class ControlPanelWidget(QWidget):
-    """
-    Widget panelu sterowania: Siatka inputów + przycisk na dole.
-    """
-
+class ControlPanelWidget(AutoRefreshWidget):
     def __init__(self):
         super().__init__()
+        self._setup_ui()
+
+    def _setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Grid: Etykieta | Input
-        grid = QGridLayout()
-        grid.setSpacing(10)
-        grid.setColumnStretch(1, 1)  # Inputy szerokie
+        self.inp_symbol = SmartLineEdit(placeholder_key="enter_symbol_placeholder")
+        self.cmb_range = SmartComboBox(items=list(PREDICTION_RANGES.keys()))
 
-        # Rząd 1: Symbol
-        self.lbl_symbol = QLabel()
-        self.inp_symbol = QLineEdit("NVDA")
         CONTROLLER.set_symbol_input(self.inp_symbol)
-
-        grid.addWidget(self.lbl_symbol, 0, 0)
-        grid.addWidget(self.inp_symbol, 0, 1)
-
-        # Rząd 2: Zakres
-        self.lbl_range = QLabel()
-        self.cmb_range = QComboBox()
-        self.cmb_range.addItems(["5m", "15m", "1h", "1d", "7d", "14d", "30d"])
         CONTROLLER.set_range_combo(self.cmb_range)
 
-        grid.addWidget(self.lbl_range, 1, 0)
-        grid.addWidget(self.cmb_range, 1, 1)
-
+        grid = LayoutHelper.create_form_grid([
+            ("symbol_label", self.inp_symbol),
+            ("prediction_range", self.cmb_range),
+        ])
         layout.addLayout(grid)
 
-        # Przycisk na dole
-        self.btn_calc = QPushButton()
+        self.btn_calc = SmartButton(
+            tr_key="calculate_button",
+            on_click=CONTROLLER.on_calculate
+        )
         CONTROLLER.set_calc_button(self.btn_calc)
         layout.addWidget(self.btn_calc)
 
         layout.addStretch(1)
 
-        AppState.state_changed.connect(self.refresh_ui)
-        self.refresh_ui()
-
-    def refresh_ui(self):
-        theme = get_theme_cfg()
-
-        # Tłumaczenia
-        self.lbl_symbol.setText(get_tr("symbol_label"))
-        self.lbl_range.setText(get_tr("prediction_range"))
-        self.btn_calc.setText(get_tr("calculate_button"))
-
-        # Style - używamy helpera get_style_str
-        lbl_style = get_style_str(theme, "label")
-        self.lbl_symbol.setStyleSheet(lbl_style)
-        self.lbl_range.setStyleSheet(lbl_style)
-
-        self.inp_symbol.setStyleSheet(get_style_str(theme, "lineedit_style"))
-        self.cmb_range.setStyleSheet(get_style_str(theme, "combobox_style"))
-        self.btn_calc.setStyleSheet(get_style_str(theme, "button_style"))
+    def _refresh_content(self):
+        pass
 
 
-class PriceSummaryWidget(QWidget):
-    """
-    Widget wyników: Symbol na górze, ceny obok siebie pod spodem.
-    """
-
+class PriceSummaryWidget(AutoRefreshWidget):
     def __init__(self):
         super().__init__()
+        self._current_price = None
+        self._predicted_price = None
+        self._symbol = None
+        self._company_name = None
+        self._accuracy = None
+        self._setup_ui()
+        self.hide()
 
+    def _setup_ui(self):
+        theme = ThemeManager.get_current_theme()
+        cfg = theme.get("price_summary", {})
+
+        # Główny layout z większymi marginesami z themes
         layout = QVBoxLayout(self)
-        layout.setSpacing(10)
-        layout.setContentsMargins(10, 10, 10, 10)
+        margins = cfg.get("margins", (0,0,0,0))
+        spacing = cfg.get("spacing", 5)
+        layout.setContentsMargins(*margins)
+        layout.setSpacing(spacing)
 
-        # 1. Symbol
-        self.symbol_label = QLabel("")
-        self.symbol_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.symbol_label)
+        # RZĄD 1: Nazwa spółki (32px) i dokładność (22px)
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(10)
 
-        # 2. Ceny (HBox)
+        from PySide6.QtWidgets import QLabel as QLabel_native
+
+        # Nazwa spółki - zastosuj symbol_style (32px)
+        self.company_name = QLabel_native("")
+        self.company_name.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header_layout.addWidget(self.company_name)
+
+        # Dokładność w nawiasie (22px)
+        self.accuracy_label = QLabel_native("")
+        self.accuracy_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        header_layout.addWidget(self.accuracy_label)
+
+        header_layout.addStretch()
+        layout.addLayout(header_layout)
+
+        # RZĄD 2: Ceny w jednym rzędzie
         prices_layout = QHBoxLayout()
-        prices_layout.setSpacing(20)
+        prices_layout.setSpacing(40)
 
-        # Lewa: Obecna
-        self.current_label = QLabel()
-        self.current_label.setAlignment(Qt.AlignCenter)
-        self.current_value = QLabel("--")
-        self.current_value.setAlignment(Qt.AlignCenter)
+        # Current Price (lewy blok)
+        current_block = QHBoxLayout()
+        current_block.setSpacing(10)
 
-        curr_box = QVBoxLayout()
-        curr_box.addWidget(self.current_label)
-        curr_box.addWidget(self.current_value)
-        prices_layout.addLayout(curr_box)
+        # Tytuł - używa label_style (18px)
+        self.current_title = SmartLabel(tr_key="current_price", alignment="left")
 
-        # Prawa: Przewidywana
-        self.predicted_label = QLabel()
-        self.predicted_label.setAlignment(Qt.AlignCenter)
-        self.predicted_value = QLabel("--")
-        self.predicted_value.setAlignment(Qt.AlignCenter)
+        # Wartość - QLabel dla pełnej kontroli
+        self.current_value = QLabel_native("--")
+        self.current_value.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-        pred_box = QVBoxLayout()
-        pred_box.addWidget(self.predicted_label)
-        pred_box.addWidget(self.predicted_value)
-        prices_layout.addLayout(pred_box)
+        current_block.addWidget(self.current_title)
+        current_block.addWidget(self.current_value)
+
+        # Predicted Price (prawy blok)
+        predicted_block = QHBoxLayout()
+        predicted_block.setSpacing(10)
+
+        # Tytuł - używa label_style (18px)
+        self.predicted_title = SmartLabel(tr_key="predicted_price", alignment="left")
+
+        # Wartość - QLabel dla pełnej kontroli
+        self.predicted_value = QLabel_native("--")
+        self.predicted_value.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        predicted_block.addWidget(self.predicted_title)
+        predicted_block.addWidget(self.predicted_value)
+
+        # Dodaj oba bloki
+        prices_layout.addLayout(current_block)
+        prices_layout.addLayout(predicted_block)
+        prices_layout.addStretch()
 
         layout.addLayout(prices_layout)
         layout.addStretch(1)
 
-        self.hide()
-        AppState.state_changed.connect(self.refresh_ui)
-        self.refresh_ui()
-
-    def refresh_ui(self):
-        theme = get_theme_cfg()
+    def _refresh_content(self):
+        theme = ThemeManager.get_current_theme()
         cfg = theme.get("price_summary", {})
 
-        self.setStyleSheet(cfg.get("container_style", ""))
-        self.symbol_label.setStyleSheet(cfg.get("symbol_style", ""))
+        # Styl kontenera (jeśli jest zdefiniowany)
+        container_style = cfg.get("container_style", "")
+        if container_style:
+            self.setStyleSheet(container_style)
 
-        self.current_label.setText(get_tr("current_price").upper())
-        self.current_label.setStyleSheet(cfg.get("label_style", ""))
-        self.current_value.setStyleSheet(cfg.get("value_style", ""))
+        # Zastosuj label_style do tytułów (18px z themes)
+        label_style = cfg.get("label_style")
+        self.current_title.setStyleSheet(label_style)
+        self.predicted_title.setStyleSheet(label_style)
 
-        self.predicted_label.setText(get_tr("predicted_price").upper())
-        self.predicted_label.setStyleSheet(cfg.get("label_style", ""))
-        self.predicted_value.setStyleSheet(cfg.get("value_style", ""))
+        # PRZYWRÓĆ dane jeśli były wcześniej ustawione
+        if self._current_price is not None and self._predicted_price is not None:
+            self._apply_display_update()
 
-    def update_prices(self, current, predicted, symbol):
-        self.symbol_label.setText(symbol.upper())
-        self.current_value.setText(f"{current:.2f}$")
-        self.predicted_value.setText(f"{predicted:.2f}$")
-        theme = get_theme_cfg()
+    def _update_accuracy_display(self, accuracy):
+
+        theme = ThemeManager.get_current_theme()
         cfg = theme.get("price_summary", {})
-        diff = predicted - current
-        style = cfg.get("positive_style", "") if diff > 0 else (
-            cfg.get("negative_style", "") if diff < 0 else cfg.get("value_style", ""))
-        self.predicted_value.setStyleSheet(style)
+
+        acc_text = ThemeManager.get_translation("prediction_accuracy")
+        display_text = f"({acc_text}: {accuracy:.1f}%)"
+
+        # Kolorowanie w zależności od wartości
+        if accuracy >= 70:
+            color = "#00aa00"  # Zielony
+        elif accuracy >= 50:
+            color = "#ff9900"  # Pomarańczowy
+        else:
+            color = "#cc0000"  # Czerwony
+
+        base_color = cfg.get("text_color", "#333")
+
+        # Styl dla accuracy (22px z themes - większe niż 20px)
+        style = f"font-size: 22px; font-weight: bold; color: {color};"
+        self.accuracy_label.setText(display_text)
+        self.accuracy_label.setStyleSheet(style)
+
+    def _apply_display_update(self):
+        theme = ThemeManager.get_current_theme()
+        cfg = theme.get("price_summary", {})
+
+        # Nazwa spółki - zastosuj symbol_style (32px z themes)
+        display_name = self._company_name if self._company_name else (self._symbol.upper() if self._symbol else "")
+        company_style = cfg.get("symbol_style", "font-size: 32px; font-weight: bold;")
+        self.company_name.setText(display_name)
+        self.company_name.setStyleSheet(company_style)
+
+        # Dokładność (22px, kolorowana)
+        if self._accuracy is not None:
+            self._update_accuracy_display(self._accuracy)
+        else:
+            self.accuracy_label.setText("")
+
+        # Current Price - zastosuj value_style (24px z themes)
+        if self._current_price is not None:
+            current_text = f"${self._current_price:.2f}"
+            value_style = cfg.get("value_style", "font-size: 24px; font-weight: bold;")
+            self.current_value.setText(current_text)
+            self.current_value.setStyleSheet(value_style)
+
+        # Predicted Price - zastosuj positive_style/negative_style (24px z themes)
+        if self._predicted_price is not None:
+            predicted_text = f"${self._predicted_price:.2f}"
+            self.predicted_value.setText(predicted_text)
+
+            # Kolorowanie z themes
+            diff = self._predicted_price - self._current_price
+
+            if diff > 0:
+                # Użyj positive_style z themes (24px, zielony)
+                style = cfg.get("positive_style", "color: #00aa00; font-size: 24px; font-weight: bold;")
+            elif diff < 0:
+                # Użyj negative_style z themes (24px, czerwony)
+                style = cfg.get("negative_style", "color: #cc0000; font-size: 24px; font-weight: bold;")
+            else:
+                # Użyj value_style z themes (24px, neutralny)
+                style = cfg.get("value_style", "font-size: 24px; font-weight: bold;")
+
+            self.predicted_value.setStyleSheet(style)
+
+    def update_prices(self, current, predicted, symbol, company_name=None, accuracy=None):
+        self._current_price = current
+        self._predicted_price = predicted
+        self._symbol = symbol
+        self._company_name = company_name
+
+        # Ekstrakcja accuracy z dict
+        if accuracy is not None:
+            if isinstance(accuracy, dict) and "accuracy" in accuracy:
+                self._accuracy = accuracy["accuracy"]
+            elif isinstance(accuracy, (int, float)):
+                self._accuracy = accuracy
+            else:
+                self._accuracy = None
+        else:
+            self._accuracy = None
+
+        self._apply_display_update()
+
         self.show()
 
-
-# --- Controller ---
-
 class PredictionController:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
     def __init__(self):
-        self.symbol_input = None;
-        self.calc_btn = None;
+        if self._initialized:
+            return
+
+        self.symbol_input = None
+        self.calc_btn = None
         self.selected_range = "15m"
-        self.placeholder = None;
-        self.chart = None;
+        self.placeholder = None
+        self.chart = None
         self.price_summary = None
+        self.worker = None
 
-    def set_symbol_input(self, w):
-        self.symbol_input = w
-        w.textChanged.connect(lambda t: self.calc_btn.setEnabled(bool(t.strip())) if self.calc_btn else None)
+        self._initialized = True
 
-    def set_calc_button(self, w):
-        self.calc_btn = w
-        w.clicked.connect(self.on_calculate)
+    def set_symbol_input(self, widget):
+        self.symbol_input = widget
+        widget.textChanged.connect(self._on_symbol_changed)
 
-    def set_range_combo(self, w):
-        w.setCurrentText("15m")
-        w.currentTextChanged.connect(lambda t: setattr(self, 'selected_range', t))
+    def set_calc_button(self, widget):
+        self.calc_btn = widget
 
-    def set_placeholder(self, w):
-        self.placeholder = w
+    def set_range_combo(self, widget):
+        widget.setCurrentText("15m")
+        widget.currentTextChanged.connect(self._on_range_changed)
 
-    def set_chart(self, w):
-        self.chart = w
+    def set_placeholder(self, widget):
+        self.placeholder = widget
 
-    def set_price_summary(self, w):
-        self.price_summary = w
+    def set_chart(self, widget):
+        self.chart = widget
+
+    def set_price_summary(self, widget):
+        self.price_summary = widget
+
+    def _on_symbol_changed(self, text):
+        if self.calc_btn:
+            self.calc_btn.setEnabled(bool(text.strip()))
+
+    def _on_range_changed(self, text):
+        self.selected_range = text
 
     def on_calculate(self):
-        if not self.symbol_input: return
-        symbol = self.symbol_input.text().strip().upper()
-        if not symbol: QMessageBox.warning(None, "Error", get_tr("error_no_symbol")); return
+        if not self.symbol_input:
+            return
 
-        prediction_ranges = {
-            "5m": {"period": "2d", "interval": "5m"},
-            "15m": {"period": "3d", "interval": "15m"},
-            "1h": {"period": "1wk", "interval": "60m"},
-            "1d": {"period": "1y", "interval": "1d"},
-            "7d": {"period": "1y", "interval": "1wk"},
-            "30d": {"period": "5y", "interval": "1mo"},
-        }
-        cfg = prediction_ranges.get(self.selected_range, prediction_ranges["15m"])
-        if self.calc_btn: self.calc_btn.setEnabled(False)
-        self.worker = PredictionWorker(symbol, cfg["period"], cfg["interval"])
+        symbol = self.symbol_input.text().strip().upper()
+        if not symbol:
+            QMessageBox.warning(
+                None,
+                ThemeManager.get_translation("error_title"),
+                ThemeManager.get_translation("error_no_symbol")
+            )
+            return
+
+        range_config = PREDICTION_RANGES.get(self.selected_range, PREDICTION_RANGES["15m"])
+
+        if self.calc_btn:
+            self.calc_btn.setEnabled(False)
+
+        self.worker = PredictionWorker(symbol, range_config["period"], range_config["interval"])
         self.worker.finished.connect(self.on_finished)
         self.worker.error.connect(self.on_error)
         self.worker.start()
 
-    def on_finished(self, res):
-        if self.calc_btn: self.calc_btn.setEnabled(True)
-        if self.placeholder: self.placeholder.hide()
-        if self.chart: self.chart.update_chart(res["df"], res["next_price"], self.selected_range)
-        if self.price_summary: self.price_summary.update_prices(res["current_price"], res["next_price"], res["symbol"])
+    def on_finished(self, result):
+        if self.calc_btn:
+            self.calc_btn.setEnabled(True)
+        if self.placeholder:
+            self.placeholder.hide()
+        if self.chart:
+            self.chart.update_chart(result["df"], result["next_price"], self.selected_range)
+        if self.price_summary:
+            accuracy_metrics = {
+                "accuracy": result.get("accuracy", 0),
+                "rmse": result.get("rmse", 0),
+                "mape": result.get("mape", 0)
+            }
+            self.price_summary.update_prices(
+                result["current_price"],
+                result["next_price"],
+                result["symbol"],
+                company_name=result.get("company_name"),
+                accuracy=accuracy_metrics
 
-    def on_error(self, err):
-        if self.calc_btn: self.calc_btn.setEnabled(True)
-        QMessageBox.critical(None, "Error", f"{get_tr('error_prediction')}: {err}")
+            )
+
+    def on_error(self, error_msg):
+        if self.calc_btn:
+            self.calc_btn.setEnabled(True)
+
+        QMessageBox.critical(
+            None,
+            ThemeManager.get_translation("error_title"),
+            f"{ThemeManager.get_translation('error_prediction')}: {error_msg}"
+        )
 
 
 CONTROLLER = PredictionController()
 
 
+
 def get_program_data():
     top_panel = [
-        {"type": "custom_widget", "widget_class": PlaceholderWidget, "on_create": CONTROLLER.set_placeholder},
-        {"type": "custom_widget", "widget_class": ChartWidget, "on_create": CONTROLLER.set_chart},
+        {
+            "type": "custom_widget",
+            "widget_class": PlaceholderWidget,
+            "on_create": CONTROLLER.set_placeholder
+        },
+        {
+            "type": "custom_widget",
+            "widget_class": ChartWidget,
+            "on_create": CONTROLLER.set_chart
+        },
     ]
 
     bottom_left_panel = [
@@ -408,14 +631,18 @@ def get_program_data():
     ]
 
     bottom_right_panel = [
-        {"type": "custom_widget", "widget_class": PriceSummaryWidget, "on_create": CONTROLLER.set_price_summary},
+        {
+            "type": "custom_widget",
+            "widget_class": PriceSummaryWidget,
+            "on_create": CONTROLLER.set_price_summary
+        },
     ]
 
     return "Stock Price Prediction", {
         "gui_type": "top_bottom_split",
         "icon_path": ":/App/Icons/prediction.png",
         "tab_type": "prediction",
-        "title": get_tr("prediction_title"),
+        "title": ThemeManager.get_translation("prediction_title"),
         "top_panel": top_panel,
         "bottom_left_panel": bottom_left_panel,
         "bottom_right_panel": bottom_right_panel,

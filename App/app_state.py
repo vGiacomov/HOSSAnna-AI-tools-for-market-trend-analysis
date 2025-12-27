@@ -2,7 +2,7 @@ from PySide6.QtCore import QObject, Signal
 
 
 class AppStateSignal(QObject):
-    changed = Signal()  # Sygnał zmiany stanu (język lub motyw)
+    changed = Signal()
 
 
 _signal_emitter = AppStateSignal()
@@ -22,7 +22,7 @@ class AppState:
     def set_language(cls, language):
         if cls._current_language != language:
             cls._current_language = language
-            cls.state_changed.emit()  # Powiadom wszystkich o zmianie!
+            cls.state_changed.emit()
 
     @classmethod
     def get_theme(cls):
@@ -32,4 +32,4 @@ class AppState:
     def set_theme(cls, theme):
         if cls._current_theme != theme:
             cls._current_theme = theme
-            cls.state_changed.emit()  # Powiadom wszystkich o zmianie!
+            cls.state_changed.emit()
