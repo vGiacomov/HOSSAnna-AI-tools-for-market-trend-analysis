@@ -35,10 +35,6 @@ class HomeConfigExtension:
         return ConfigManager.APP_FOLDER_PATH / "Configs" / "favorites.txt"
 
     @staticmethod
-    def _get_recently_analyzed_path():
-        return ConfigManager.APP_FOLDER_PATH / "Configs" / "recently_analyzed.txt"
-
-    @staticmethod
     def load_favorites():
         favorites_path = HomeConfigExtension._get_favorites_path()
 
@@ -69,33 +65,6 @@ class HomeConfigExtension:
             print(f"[HomeConfig] Error saving favorites: {e}")
             return False
 
-    @staticmethod
-    def add_recently_analyzed(ticker):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        recently_path = HomeConfigExtension._get_recently_analyzed_path()
-
-        recent = []
-        if recently_path.exists():
-            try:
-                with open(recently_path, 'r', encoding='utf-8') as f:
-                    recent = [line.strip() for line in f if line.strip()]
-            except:
-                pass
-
-        recent = [line for line in recent if not line.startswith(f"{ticker}|")]
-        recent.insert(0, f"{ticker}|{timestamp}")
-        recent = recent[:20]
-
-        try:
-            recently_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(recently_path, 'w', encoding='utf-8') as f:
-                for line in recent:
-                    f.write(f"{line}\n")
-            return True
-        except Exception as e:
-            print(f"[HomeConfig] Error saving recently analyzed: {e}")
-            return False
-
 
 # --- Worker ---
 
@@ -118,19 +87,34 @@ class MarketWorker(QThread):
                     info = stock.info
                     hist = stock.history(period="2d")
 
+                    # Get company name with fallback to ticker
+                    company_name = info.get('longName', info.get('shortName', ticker))
+
                     if not hist.empty and len(hist) >= 2:
                         current = hist['Close'].iloc[-1]
                         prev = hist['Close'].iloc[-2]
                         change_pct = ((current - prev) / prev) * 100
-                        data[ticker] = {"price": float(current), "change": float(change_pct)}
+                        data[ticker] = {
+                            "price": float(current),
+                            "change": float(change_pct),
+                            "name": company_name
+                        }
                     elif not hist.empty:
                         current = hist['Close'].iloc[-1]
-                        data[ticker] = {"price": float(current), "change": 0.0}
+                        data[ticker] = {
+                            "price": float(current),
+                            "change": 0.0,
+                            "name": company_name
+                        }
                     else:
-                        data[ticker] = {"price": 0.0, "change": 0.0}
+                        data[ticker] = {
+                            "price": 0.0,
+                            "change": 0.0,
+                            "name": company_name
+                        }
                 except Exception as e:
                     print(f"Error fetching {ticker}: {e}")
-                    data[ticker] = {"price": 0.0, "change": 0.0}
+                    data[ticker] = {"price": 0.0, "change": 0.0, "name": ticker}
 
             self.finished.emit(data)
         except Exception as e:
@@ -176,6 +160,11 @@ class MarketItemWidget(QFrame):
 
         AppState.state_changed.connect(self.update_style)
         self.update_style()
+
+    def update_name(self, name):
+        """Update the displayed name"""
+        self.display_name = name
+        self.lbl_symbol.setText(self.display_name)
 
     def update_data(self, price, change):
         theme = get_theme()
@@ -240,7 +229,6 @@ class FavoritesPanel(CardFrame):
         header_lay.addWidget(self.btn_add)
         layout.addLayout(header_lay)
 
-
         self.list_container = QWidget()
         self.list_layout = QVBoxLayout(self.list_container)
         self.list_layout.setContentsMargins(0, 0, 0, 0)
@@ -279,6 +267,9 @@ class FavoritesPanel(CardFrame):
     def on_data_received(self, data):
         for t, values in data.items():
             if t in self.items:
+                # Update the display name with company name
+                if "name" in values:
+                    self.items[t].update_name(values["name"])
                 self.items[t].update_data(values["price"], values["change"])
 
     def add_ticker(self):
