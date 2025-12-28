@@ -3,7 +3,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QPushButton, QLabel,
     QGridLayout, QScrollArea, QLineEdit, QComboBox, QSizePolicy)
-from App.app_state import AppState
+from App.App_state import AppState
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
 
 

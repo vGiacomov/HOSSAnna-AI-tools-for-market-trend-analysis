@@ -1,9 +1,12 @@
 import sys
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
+
+import AppConfigurator
 from Launcher.Launcher import LauncherWindow
 from Launcher.SetupWizard import SetupWizard
-from App.mainPage import MainWindow
+from App.AppCreator import MainWindow
+from AppConfigurator import InitialSettings, AppSettings
 import os
 import json
 import yfinance as yf
@@ -15,7 +18,7 @@ from PySide6.QtCore import Qt, QThread, Signal, QUrl, QStandardPaths
 from PySide6.QtGui import QDesktopServices, QIcon, QPixmap
 import sys
 from pathlib import Path
-from App.app_state import AppState
+from App.App_state import AppState
 from App.translations import TRANSLATIONS
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
 import yfinance as yf
@@ -33,9 +36,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import QThread, Signal, Qt
 
-from App.app_state import AppState
+from App.App_state import AppState
 from App.translations import TRANSLATIONS
 from App.Pages.PredictionThemes import LIGHT_THEME, DARK_THEME
+import keras
 
 
 
@@ -58,24 +62,6 @@ tf.get_logger().setLevel("ERROR")
 
 
 
-class InitialSettings:
-    def __init__(self):
-        self.appName = "HOSSAnna"
-        self.appFolderPath = Path(os.getenv('APPDATA')) / self.appName
-        self.configPath = self.appFolderPath /'Configs' / 'config.txt'
-
-        self.isAdmin = False
-        self.isConfig = False
-        self.isNetwork = False
-
-    def set_admin_value(self, value: bool):
-        self.isAdmin = value
-
-    def set_first_start_value(self, value: bool):
-        self.isConfig = value
-
-    def set_network_value(self, value: bool):
-        self.isNetwork = value
 
 
 
@@ -84,20 +70,19 @@ class InitialSettings:
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("Icons/Logo.ico"))
-    settings = InitialSettings()
 
     # Launcher
-    launcher = LauncherWindow(settings)
+    launcher = LauncherWindow()
     launcher.show()
     app.exec()
 
     # Open Setup Wizard if first start
-    if not settings.isConfig:
-        setupWizard = SetupWizard(settings.appFolderPath, settings.appName)
+    if not AppConfigurator.InitialSettings.isConfig:
+        setupWizard = SetupWizard()
         setupWizard.show()
         app.exec()
 
-    Aplication = MainWindow(settings)
+    Aplication = MainWindow()
     Aplication.show()
     app.exec()
 

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QLabel, QPushButton, QLineEdit, QComboBox
 from PySide6.QtCore import Qt
-from App.app_state import AppState
+from App.App_state import AppState
 from App.translations import TRANSLATIONS
 from App.themes import LIGHT_THEME, DARK_THEME
 

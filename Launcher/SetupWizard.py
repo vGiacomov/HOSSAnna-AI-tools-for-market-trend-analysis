@@ -1,46 +1,17 @@
 import os
+from pathlib import Path
 from PySide6.QtWidgets import (
     QWidget, QLabel, QVBoxLayout, QComboBox, QPushButton,
-    QHBoxLayout, QTextEdit, QCheckBox, QApplication, QStackedWidget)
+    QHBoxLayout, QTextEdit, QCheckBox, QStackedWidget
+)
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from pathlib import Path
+
+from Launcher.ConfigManager import ConfigManager
 from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
 from Launcher.Launcher_translations import languagesList, TRANSLATIONS
 from Launcher.TermsOfUse import TOU
-
-
-class ConfigManager:
-    @staticmethod
-    def create_appdata_structure(appFolderPath):
-        if not appFolderPath:
-            return False
-        base_path = appFolderPath
-        configs_path = base_path / 'Configs'
-        logs_path = base_path / 'logs'
-        try:
-            configs_path.mkdir(parents=True, exist_ok=True)
-            logs_path.mkdir(parents=True, exist_ok=True)
-            return True
-        except Exception:
-            return False
-
-    @staticmethod
-    def save_config(language, theme, terms_accepted, appFolderPath):
-        if not appFolderPath:
-            return False
-
-        config_path = appFolderPath / 'Configs' / 'config.txt'
-
-        try:
-            config_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(config_path, 'w', encoding='utf-8') as f:
-                f.write(f"language={language}\n"
-                       f"theme={theme}\n"
-                       f"terms_accepted={terms_accepted}\n")
-            return True
-        except (OSError, IOError) as e:
-            return False
+from AppConfigurator import InitialSettings, AppSettings
 
 
 class SetupWizard(QWidget):
@@ -51,13 +22,14 @@ class SetupWizard(QWidget):
     STEP_TERMS = 2
     STEP_FINAL = 3
 
-    def __init__(self, appFolderPath, appName):
+    def __init__(self):
         super().__init__()
 
-        self.appFolderPath = appFolderPath
-        self.appName = appName
+        # Paths
+        self.appFolderPath = AppSettings.app_folder_path()
+        self.appName = AppSettings.appName
 
-        # Default values
+        # Default selections
         self.selected_language = "English"
         self.selected_theme = "light"
         self.terms_accepted = False
@@ -69,7 +41,7 @@ class SetupWizard(QWidget):
         # UI setup
         self.resize(720, 480)
         self.setFixedSize(720, 480)
-        self.setWindowTitle(self.appName + " Setup")
+        self.setWindowTitle(f"{self.appName} Setup")
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(50, 30, 50, 30)
@@ -77,6 +49,7 @@ class SetupWizard(QWidget):
 
         self.theme = LIGHT_THEME
 
+        # Create steps
         self.create_language_step()
         self.create_theme_step()
         self.create_terms_step()
@@ -85,12 +58,11 @@ class SetupWizard(QWidget):
         self.main_layout.addWidget(self.stacked_widget)
         self.setLayout(self.main_layout)
 
+        # Apply theme and translations
         self.apply_theme()
         self.update_translations()
 
-    # -------------------------
     # Theme / styling
-    # -------------------------
     def apply_theme(self):
         self.theme = DARK_THEME if self.selected_theme == "dark" else LIGHT_THEME
         self.setStyleSheet(self.theme.get("main", ""))
@@ -107,17 +79,14 @@ class SetupWizard(QWidget):
             if widget_key in self._widgets_to_style:
                 self._widgets_to_style[widget_key].setStyleSheet(self.theme.get(theme_key, ""))
 
-    # -------------------------
-    # Helper methods
-    # -------------------------
     @staticmethod
     def is_checked(state):
         return state == Qt.Checked or state == 2
 
+    # Navigation helper
     def create_navigation_buttons(self, back_index=None, next_index=None):
         layout = QHBoxLayout()
         layout.setSpacing(20)
-
         buttons = []
 
         if back_index is not None:
@@ -134,15 +103,14 @@ class SetupWizard(QWidget):
 
         return layout, buttons
 
-    # -------------------------
-    # Steps creation
-    # -------------------------
+    # Steps
     def create_language_step(self):
         widget = QWidget()
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         layout.setSpacing(20)
 
+        # Title
         title = QLabel()
         title.setStyleSheet("font-size: 24px; font-weight: bold;")
         title.setAlignment(Qt.AlignCenter)
@@ -151,6 +119,7 @@ class SetupWizard(QWidget):
 
         layout.addSpacing(30)
 
+        # Language combo
         self.language_combo = QComboBox()
         self.language_combo.addItems(languagesList)
         self.language_combo.currentTextChanged.connect(self.on_language_changed)
@@ -159,6 +128,7 @@ class SetupWizard(QWidget):
 
         layout.addSpacing(50)
 
+        # Next button
         next_button = QPushButton()
         next_button.clicked.connect(lambda: self.stacked_widget.setCurrentIndex(self.STEP_THEME))
         layout.addWidget(next_button, alignment=Qt.AlignCenter)
@@ -207,8 +177,6 @@ class SetupWizard(QWidget):
         layout.addWidget(self.theme_info_label)
         self._translatable_widgets['theme_info'] = self.theme_info_label
 
-        layout.addSpacing(30)
-
         nav_layout, buttons = self.create_navigation_buttons(self.STEP_LANGUAGE, self.STEP_TERMS)
         for key, btn in buttons:
             self._translatable_widgets[f'theme_{key}'] = btn
@@ -228,10 +196,10 @@ class SetupWizard(QWidget):
         layout.addWidget(title)
         self._translatable_widgets['terms_title'] = title
 
+        # Terms text
         self.terms_text = QTextEdit()
         self.terms_text.setReadOnly(True)
-        terms_content = TOU.Load_TOU()
-        self.terms_text.setPlainText(terms_content or "Terms of Use not found. Please add a terms.txt file.")
+        self.terms_text.setPlainText(TOU.Load_TOU() or "Terms of Use not found.")
         layout.addWidget(self.terms_text)
         self._widgets_to_style["terms_text"] = self.terms_text
 
@@ -239,11 +207,13 @@ class SetupWizard(QWidget):
         scrollbar.valueChanged.connect(self.check_scroll_position)
         scrollbar.rangeChanged.connect(self.check_scroll_position_on_load)
 
+        # Info label
         self.info_label = QLabel()
         self.info_label.setStyleSheet("font-size: 13px; color: #444;")
         layout.addWidget(self.info_label)
         self._translatable_widgets['terms_info'] = self.info_label
 
+        # Accept checkbox
         self.accept_checkbox = QCheckBox()
         self.accept_checkbox.setEnabled(False)
         self.accept_checkbox.stateChanged.connect(self.on_terms_accepted)
@@ -294,9 +264,8 @@ class SetupWizard(QWidget):
         widget.setLayout(layout)
         self.stacked_widget.addWidget(widget)
 
-    # -------------------------
+
     # Event handlers
-    # -------------------------
     def check_scroll_position_on_load(self):
         QTimer.singleShot(100, self.check_scroll_position)
 
@@ -346,13 +315,23 @@ class SetupWizard(QWidget):
                 if text:
                     self._translatable_widgets[widget_key].setText(text)
 
+    # Finish setup
     def finish_setup(self):
-        ConfigManager.create_appdata_structure(self.appFolderPath)
+        # Ustawienia klasowe
+        InitialSettings.set_admin_value(True)
+        InitialSettings.set_network_value(True)
+        InitialSettings.set_first_start_value(True)
+
+        # Tworzymy strukturę AppData
+        ConfigManager.create_appdata_structure(AppSettings.app_folder_path())
+
+        # Zapis konfiguracji
         ConfigManager.save_config(
-            self.selected_language,
-            self.selected_theme,
-            self.terms_accepted,
-            self.appFolderPath
+            language=self.selected_language,
+            theme=self.selected_theme,
+            terms_accepted=self.terms_accepted,
+            app_folder_path=AppSettings.app_folder_path()
         )
+
         self.finished.emit()
         self.close()

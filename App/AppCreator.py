@@ -3,9 +3,11 @@ import resources_rc
 from App.Pages.Prediction import get_program_data
 from App.PageTamplate import ModuleTab
 from App.themes import LIGHT_THEME, DARK_THEME
-from App.app_state import AppState
+from App.App_state import AppState
 from App.translations import TRANSLATIONS, languagesList
 from App.Pages.HomePage import get_program_data as get_home_data
+from Launcher.ConfigManager import ConfigManager
+from AppConfigurator import InitialSettings, AppSettings
 
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize
@@ -15,58 +17,13 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QPushButton, QHBoxLayout,
                                QCheckBox)
 
 
-class ConfigManager:
-    def __init__(self, initial_settings):
-        self.initial_settings = initial_settings
-        self.config_path = initial_settings.configPath
-        self.app_folder_path = initial_settings.appFolderPath
-
-
-    def load_config(self):
-
-        default_config = {
-            "language": "English",
-            "theme": "light",
-            "terms_accepted": False
-        }
-
-        if not self.config_path.exists():
-            return default_config
-
-        try:
-            config = {}
-            with open(self.config_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    if '=' in line.strip():
-                        key, value = line.strip().split('=', 1)
-                        config[key] = value
-
-            return {
-                "language": config.get("language", "English"),
-                "theme": config.get("theme", "light"),
-                "terms_accepted": config.get("terms_accepted", "False") == "True"
-            }
-        except Exception:
-            return default_config
-
-    def save_config(self, language, theme):
-        try:
-            self.config_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.config_path, 'w', encoding='utf-8') as f:
-                f.write(f"language={language}\n"
-                        f"theme={theme}\n")
-            return True
-        except (OSError, IOError):
-            return False
-
-
 class SettingsWindow(QDialog, AppState):
     def __init__(self, main_window):
         super().__init__()
         self.main_window = main_window
-        self.config_manager = main_window.config_manager
-        self.current_language = main_window.current_language
-        self.current_theme = main_window.current_theme
+        config = ConfigManager.load_config()
+        self.current_language = config["language"]
+        self.current_theme = config["theme"]
 
         self.setWindowTitle(self.tr_text("settings_title"))
         self.setWindowIcon(QIcon(":/Icons/Logo.ico"))
@@ -199,7 +156,7 @@ class SettingsWindow(QDialog, AppState):
             self.theme_checkbox.setStyleSheet(theme.get("theme_switch", ""))
 
     def apply_settings(self):
-        if self.config_manager.save_config(self.current_language, self.current_theme):
+        if ConfigManager.save_config(self.current_language, self.current_theme, terms_accepted=True):
             AppState.set_language(self.current_language)
             AppState.set_theme(self.current_theme)
 
@@ -284,20 +241,22 @@ class NavMenu(QFrame, AppState):
 
 
 class MainWindow(QMainWindow, AppState):
-    def __init__(self, initialSettings):
+    def __init__(self):
         super().__init__()
 
-        self.config_manager = ConfigManager(initialSettings)
-        config = self.config_manager.load_config()
-
+        config = ConfigManager.load_config()
         self.current_language = config["language"]
         self.current_theme = config["theme"]
-        self.initialSettings = initialSettings
+
+        self.setWindowTitle(AppSettings.appName)
+        self.app_folder_path = AppSettings.app_folder_path
+        self.config_path = AppSettings.config_path
+
 
         AppState.set_language(self.current_language)
         AppState.set_theme(self.current_theme)
 
-        self.setWindowTitle(initialSettings.appName)
+        self.setWindowTitle(AppSettings.appName)
         self.setWindowIcon(QIcon(":/Icons/Logo.ico"))
         self.resize(1280, 720)
         self.setMinimumSize(1280, 720)
@@ -355,17 +314,18 @@ class MainWindow(QMainWindow, AppState):
     def open_settings(self):
         SettingsWindow(self).exec()
 
-    """ 
-    # not use in this project only as backup to not forger. I will remove it later
-    def show_module_tab(self, tab_type, title, modules_config):    
-        if tab_type in self.module_tabs:
-            tab = self.module_tabs[tab_type]
-            tab.reset_to_main_page()
-        else:
-            tab = ModuleTabContainer(tab_type, title, modules_config)
-            self.module_tabs[tab_type] = tab
-            self.stacked_widget.addWidget(tab)
 
-        self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(tab))
-        self.current_module_type = tab_type
-"""
+    """ 
+     # not use in this project only as backup to not forger. I will remove it later ;)
+     def show_module_tab(self, tab_type, title, modules_config):    
+         if tab_type in self.module_tabs:
+             tab = self.module_tabs[tab_type]
+             tab.reset_to_main_page()
+         else:
+             tab = ModuleTabContainer(tab_type, title, modules_config)
+             self.module_tabs[tab_type] = tab
+             self.stacked_widget.addWidget(tab)
+
+         self.stacked_widget.setCurrentIndex(self.stacked_widget.indexOf(tab))
+         self.current_module_type = tab_type
+ """

@@ -1,38 +1,23 @@
-"""
-themes.py
-=========
-Plik z motywami dla aplikacji - wszystkie style w jednym miejscu.
-"""
-
 LIGHT_THEME = {
     "placeholder": {
         "text_color": "#666",
-        "text_style": "font-size: 22px; color: #666; font-weight: bold; font-style: italic"
+        "text_style": "font-size: 18px; color: #666; font-weight: bold; font-style: italic"
     },
 
     "price_summary": {
-        "min_height": 120,
-        "max_height": 300,
-        "margins": (10, 20, 30, 10),
-        "spacing": 5,
+        "min_height": 80,
+        "max_height": 200,
+        "margins": (5, 15, 20, 5),
+        "spacing": 0,
         "border": "radius: 10px",
         "background": "white",
         "text_color": "#333",
         "border_color": "#000",
 
-        # Nazwa spółki (większa)
-        "symbol_style": "font-size: 32px; color: #333; font-weight: bold; border: none;",
-
-        # Tytuły cen (Current Price, Predicted Price)
-        "label_style": "font-size: 18px; color: #666; font-weight: bold; border: none;",
-
-        # Wartości cen (neutralne)
+        "symbol_style": "font-size: 24px; color: #333; font-weight: bold; border: none;",
+        "label_style": "font-size: 24px; color: #333; font-weight: bold; border: none;",
         "value_style": "font-size: 24px; color: #333; font-weight: bold; border: none;",
-
-        # Przewidywana cena (wzrost)
         "positive_style": "font-size: 24px; color: #00cc00; font-weight: bold; border: none;",
-
-        # Przewidywana cena (spadek)
         "negative_style": "font-size: 24px; color: #cc0000; font-weight: bold; border: none;"
     },
 
@@ -62,8 +47,8 @@ LIGHT_THEME = {
         },
         "mpf_style_base": "yahoo",
         "mpf_style_config": {
-            "gridcolor": "rgba(221, 221, 221, 0.8)",
-            "gridstyle": "--",
+            "gridcolor": "rgba(221, 221, 221, 0.8)",  # #ddd z opacity 0.8
+            "gridstyle": "--",  # Linia przerywana (dashed)
             "facecolor": "white",
             "edgecolor": "#333",
             "figcolor": "white"
@@ -79,7 +64,7 @@ LIGHT_THEME = {
     },
 
     "label": {
-        "style": "font-size: 15px; font-weight: bold; color: #333333;"
+        "style": "font-size: 13px; font-weight: bold; color: #333333;"
     },
 
     "lineedit_style": """
@@ -88,8 +73,8 @@ LIGHT_THEME = {
             border-radius: 4px;
             background: #ffffff;
             color: #333333;
-            font-size: 16px;
-            padding: 8px;
+            font-size: 14px;
+            padding: 5px;
         }
     """,
 
@@ -99,23 +84,22 @@ LIGHT_THEME = {
             border: 1px solid #cccccc;
             border-radius: 4px;
             color: #333333;
-            font-size: 16px;
-            padding: 8px;
+            font-size: 14px;
+            padding: 5px;
         }
         QComboBox QAbstractItemView {
             background-color: #ffffff;
             border: 1px solid #cccccc;
             selection-background-color: #f0f0f0;
             selection-color: #000000;
-            font-size: 15px;
         }
     """,
 
     "button_style": """
         QPushButton {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: bold;
-            padding: 10px 16px;
+            padding: 8px 12px;
             border-radius: 6px;
             background-color: #d6d6c2;
             color: #333333;
@@ -133,6 +117,8 @@ LIGHT_THEME = {
         }
     """,
 
+    "label": {"style": "color: #000000; font-size: 14px; font-weight: bold;"},
+
     # Style dla Home Page
     "home_card": {
         "style": """
@@ -143,9 +129,9 @@ LIGHT_THEME = {
         }
     """
     },
-    "home_text_primary": {"style": "color: #000000; font-weight: bold; font-size: 16px;"},
-    "home_text_secondary": {"style": "color: #333333; font-size: 15px;"},
-    "home_header": {"style": "color: #000000; font-size: 24px; font-weight: 900; letter-spacing: 1px;"},
+    "home_text_primary": {"style": "color: #000000; font-weight: bold; font-size: 15px;"},
+    "home_text_secondary": {"style": "color: #333333; font-size: 14px;"},
+    "home_header": {"style": "color: #000000; font-size: 22px; font-weight: 900; letter-spacing: 1px;"},
 
     "home_btn_outline": {
         "style": """
@@ -180,32 +166,23 @@ LIGHT_THEME = {
 DARK_THEME = {
     "placeholder": {
         "text_color": "white",
-        "text_style": "font-size: 22px; color: white; font-weight: bold; font-style: italic;"
+        "text_style": "font-size: 18px; color: white; font-weight: bold; font-style: italic;"
     },
 
     "price_summary": {
-        "min_height": 120,
-        "max_height": 300,
-        "margins": (10, 20, 30, 10),
-        "spacing": 5,
+        "min_height": 80,
+        "max_height": 100,
+        "margins": (5, 15, 20, 5),
+        "spacing": 0,
         "border": "radius: 10px",
         "background": "#2b2b2b",
         "text_color": "white",
         "border_color": "#444",
 
-        # Nazwa spółki (większa)
-        "symbol_style": "font-size: 32px; color: white; font-weight: bold; border: none;",
-
-        # Tytuły cen (Current Price, Predicted Price)
-        "label_style": "font-size: 18px; color: #aaa; font-weight: bold; border: none;",
-
-        # Wartości cen (neutralne)
+        "symbol_style": "font-size: 24px; color: white; font-weight: bold; border: none;",
+        "label_style": "font-size: 24px; color: white; font-weight: bold; border: none;",
         "value_style": "font-size: 24px; color: white; font-weight: bold; border: none;",
-
-        # Przewidywana cena (wzrost)
         "positive_style": "font-size: 24px; color: #00cc00; font-weight: bold; border: none;",
-
-        # Przewidywana cena (spadek)
         "negative_style": "font-size: 24px; color: #cc0000; font-weight: bold; border: none;"
     },
 
@@ -251,7 +228,7 @@ DARK_THEME = {
     },
 
     "label": {
-        "style": "font-size: 15px; font-weight: bold; color: #ffffff;"
+        "style": "font-size: 13px; font-weight: bold; color: #ffffff;"
     },
 
     "lineedit_style": """
@@ -260,8 +237,8 @@ DARK_THEME = {
             border-radius: 4px;
             background: #2b2b2b;
             color: #ffffff;
-            font-size: 16px;
-            padding: 8px;
+            font-size: 14px;
+            padding: 5px;
         }
     """,
 
@@ -271,8 +248,8 @@ DARK_THEME = {
             border: 1px solid #555555;
             border-radius: 4px;
             color: #ffffff;
-            font-size: 16px;
-            padding: 8px;
+            font-size: 14px;
+            padding: 5px;
         }
         QComboBox::drop-down {
             subcontrol-origin: padding;
@@ -290,15 +267,14 @@ DARK_THEME = {
             border: 1px solid #555555;
             selection-background-color: #444444;
             selection-color: #ffffff;
-            font-size: 15px;
         }
     """,
 
     "button_style": """
         QPushButton {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: bold;
-            padding: 10px 16px;
+            padding: 8px 12px;
             border-radius: 6px;
             background-color: #444444;
             color: #ffffff;
@@ -316,7 +292,8 @@ DARK_THEME = {
         }
     """,
 
-    # Style dla Home Page
+    "label": {"style": "color: #e0e0e0; font-size: 14px; font-weight: bold;"},
+
     "home_card": {
         "style": """
         QFrame#Card {
@@ -326,9 +303,9 @@ DARK_THEME = {
         }
     """
     },
-    "home_text_primary": {"style": "color: #ffffff; font-weight: bold; font-size: 16px;"},
-    "home_text_secondary": {"style": "color: #cccccc; font-size: 15px;"},
-    "home_header": {"style": "color: #ffffff; font-size: 24px; font-weight: 900; letter-spacing: 1px;"},
+    "home_text_primary": {"style": "color: #ffffff; font-weight: bold; font-size: 15px;"},
+    "home_text_secondary": {"style": "color: #cccccc; font-size: 14px;"},
+    "home_header": {"style": "color: #ffffff; font-size: 22px; font-weight: 900; letter-spacing: 1px;"},
 
     "home_btn_outline": {
         "style": """
@@ -358,4 +335,5 @@ DARK_THEME = {
         QPushButton:hover { color: #aaa; }
     """
     },
+
 }

@@ -5,7 +5,7 @@ import socket
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QProgressBar
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPixmap
-
+import AppConfigurator
 
 class AdminCheck:
     @staticmethod
@@ -44,24 +44,30 @@ class ConfigCheck:
 
 
 class LauncherWindow(QWidget):
-    def __init__(self, settings):
+    def __init__(self):
         super().__init__()
 
-        self.settings = settings
         self.current_step = 0
 
         self.steps = [
-            (AdminCheck.check_admin_permission,
-             self.settings.set_admin_value,
-             200, "Checking permissions..."),
-
-            (NetworkCheck.check_network_connection,
-             self.settings.set_network_value,
-             400, "Checking network connection..."),
-
-            (lambda: ConfigCheck.config_exists(self.settings.appFolderPath),
-             self.settings.set_first_start_value,
-             600, "Checking configuration..."),
+            (
+                AdminCheck.check_admin_permission,
+                AppConfigurator.InitialSettings.set_admin_value,
+                200,
+                "Checking permissions..."
+            ),
+            (
+                NetworkCheck.check_network_connection,
+                AppConfigurator.InitialSettings.set_network_value,
+                400,
+                "Checking network connection..."
+            ),
+            (
+                lambda: ConfigCheck.config_exists(AppConfigurator.AppSettings.app_folder_path()),
+                AppConfigurator.InitialSettings.set_first_start_value,
+                600,
+                "Checking configuration..."
+            ),
         ]
 
         self.total_steps = len(self.steps)
@@ -143,7 +149,7 @@ class LauncherWindow(QWidget):
         self.progress_bar.setValue(progress_value)
 
     def finish_loading(self):
-        if not self.settings.isConfig:
+        if not AppConfigurator.InitialSettings.isConfig:
             self.status_label.setText("Preparing Setup Configurator...")
         else:
             self.status_label.setText("Preparing Application...")
