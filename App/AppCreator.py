@@ -4,10 +4,10 @@ from App.Pages.Prediction import get_program_data
 from App.PageTamplate import ModuleTab
 from App.themes import LIGHT_THEME, DARK_THEME
 from App.App_state import AppState
-from App.translations import TRANSLATIONS, languagesList
+from App.translations import TRANSLATIONS
 from App.Pages.HomePage import get_program_data as get_home_data
 from Launcher.ConfigManager import ConfigManager
-from AppConfigurator import InitialSettings, AppSettings
+from AppConfigurator import  AppSettings
 
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize
@@ -52,7 +52,7 @@ class SettingsWindow(QDialog, AppState):
         main_layout.addWidget(self.lang_title)
 
         self.language_combo = QComboBox()
-        self.language_combo.addItems(languagesList)
+        self.language_combo.addItems(AppSettings.languages)
         self.language_combo.setCurrentText(self.current_language)
         self.language_combo.currentTextChanged.connect(self.on_language_changed)
         main_layout.addWidget(self._center_widget(self.language_combo))

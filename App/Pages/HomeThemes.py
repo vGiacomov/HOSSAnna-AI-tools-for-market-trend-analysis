@@ -1,20 +1,23 @@
 """
 Motywy dla strony głównej HOSSAnna
-Inspirowane Yahoo Finance - profesjonalny wygląd finansowy
+Dopasowane do głównej palety aplikacji - beżowo-szara gama
 """
 
-# Kolory Yahoo Finance
-YAHOO_PURPLE = "#7000E3"  # Główny fiolet Yahoo
-YAHOO_BLUE = "#0078FF"    # Niebieski akcent
-GREEN_POSITIVE = "#16C784"  # Zielony dla dodatnich zmian
-RED_NEGATIVE = "#EA3943"    # Czerwony dla ujemnych zmian
+# Kolory zgodne z głównym motywem aplikacji
+BEIGE_PRIMARY = "#d6d6c2"     # Główny beżowy
+BEIGE_HOVER = "#c5c5b0"       # Ciemniejszy beżowy (hover)
+BEIGE_PRESSED = "#b5b5a0"     # Jeszcze ciemniejszy (pressed)
+GRAY_LIGHT = "#f5f5f5"        # Jasny szary
+GRAY_BORDER = "#e0e0e0"       # Szara ramka
+GREEN_POSITIVE = "#16C784"    # Zielony dla dodatnich zmian
+RED_NEGATIVE = "#EA3943"      # Czerwony dla ujemnych zmian
 
 LIGHT_THEME = {
     # Główna karta (Card)
     "card": """
         QFrame#Card {
             background-color: #FFFFFF;
-            border: 1px solid #E5E5E5;
+            border: 1px solid #e0e0e0;
             border-radius: 12px;
         }
     """,
@@ -23,7 +26,7 @@ LIGHT_THEME = {
     "section_header": """
         font-size: 18px;
         font-weight: 600;
-        color: #1A1A1A;
+        color: #333;
         border: none;
         padding: 5px 0px;
     """,
@@ -32,14 +35,17 @@ LIGHT_THEME = {
     "add_button": """
         QPushButton {
             background-color: transparent;
-            color: #7000E3;
-            border: 1.5px solid #7000E3;
+            color: #333;
+            border: 1.5px solid #d6d6c2;
             border-radius: 15px;
             font-weight: bold;
             font-size: 18px;
         }
         QPushButton:hover {
-            background-color: rgba(112, 0, 227, 0.1);
+            background-color: #d6d6c2;
+        }
+        QPushButton:pressed {
+            background-color: #c5c5b0;
         }
     """,
 
@@ -47,13 +53,13 @@ LIGHT_THEME = {
     "market_item": """
         QFrame#ItemFrame {
             background-color: transparent;
-            border: 1px solid #F0F0F0;
+            border: 1px solid #f5f5f5;
             border-radius: 6px;
             padding: 2px;
         }
         QFrame#ItemFrame:hover {
-            background-color: #F9F9F9;
-            border: 1px solid #E0E0E0;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
         }
     """,
 
@@ -61,14 +67,14 @@ LIGHT_THEME = {
     "ticker_symbol": """
         font-weight: 600;
         font-size: 14px;
-        color: #1A1A1A;
+        color: #333;
         border: none;
     """,
 
     # Cena
     "price_label": """
         font-size: 14px;
-        color: #1A1A1A;
+        color: #333;
         border: none;
         font-weight: 500;
     """,
@@ -82,6 +88,12 @@ LIGHT_THEME = {
             border-radius: 12px;
             font-weight: bold;
             font-size: 16px;
+            min-width: 25px;
+            max-width: 25px;
+            min-height: 25px;
+            max-height: 25px;
+            padding: 0px;
+            margin: 0px;
         }
         QPushButton:hover {
             background-color: rgba(234, 57, 67, 0.1);
@@ -91,8 +103,8 @@ LIGHT_THEME = {
     # Welcome Panel - przyciski akcji
     "action_button": """
         QPushButton {
-            background-color: #7000E3;
-            color: #FFFFFF;
+            background-color: #d6d6c2;
+            color: #333;
             border: none;
             border-radius: 8px;
             padding: 12px;
@@ -100,28 +112,31 @@ LIGHT_THEME = {
             font-size: 14px;
         }
         QPushButton:hover {
-            background-color: #5C00BA;
+            background-color: #c5c5b0;
+        }
+        QPushButton:pressed {
+            background-color: #b5b5a0;
         }
     """,
 
     # Statystyki rynkowe (małe widgety)
     "stats_widget": """
         QFrame#StatWidget {
-            background-color: #F9F9F9;
-            border: 1px solid #E5E5E5;
+            background-color: #f5f5f5;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
         }
         QFrame#StatWidget:hover {
-            background-color: #F5F5F5;
-            border: 1px solid #D0D0D0;
+            background-color: #f0f0f0;
+            border: 1px solid #d0d0d0;
         }
     """,
 
     # Info widget (status systemu)
     "info_widget": """
         QFrame#InfoWidget {
-            background-color: #F9F9F9;
-            border: 1px solid #E5E5E5;
+            background-color: #f5f5f5;
+            border: 1px solid #e0e0e0;
             border-radius: 6px;
         }
     """,
@@ -130,14 +145,14 @@ LIGHT_THEME = {
     "value_label": """
         font-size: 16px;
         font-weight: 600;
-        color: #1A1A1A;
+        color: #333;
         border: none;
     """,
 
     # Tytuły w stats widget
     "stats_title": """
         font-size: 11px;
-        color: #6B6B6B;
+        color: #666;
         border: none;
         font-weight: 500;
     """,
@@ -149,18 +164,20 @@ LIGHT_THEME = {
             border: none;
         }
         QScrollBar:vertical {
-            border: none;
-            background: #F5F5F5;
-            width: 8px;
-            border-radius: 4px;
+            background-color: #f5f5f5;
+            width: 12px;
+            border-radius: 6px;
         }
         QScrollBar::handle:vertical {
-            background: #CCCCCC;
-            border-radius: 4px;
+            background-color: #d6d6c2;
+            border-radius: 6px;
             min-height: 20px;
         }
         QScrollBar::handle:vertical:hover {
-            background: #AAAAAA;
+            background-color: #c5c5b0;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
         }
     """,
 
@@ -174,8 +191,8 @@ DARK_THEME = {
     # Główna karta (Card)
     "card": """
         QFrame#Card {
-            background-color: #1E1E1E;
-            border: 1px solid #3A3A3A;
+            background-color: #1e1e1e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
         }
     """,
@@ -184,7 +201,7 @@ DARK_THEME = {
     "section_header": """
         font-size: 18px;
         font-weight: 600;
-        color: #FFFFFF;
+        color: white;
         border: none;
         padding: 5px 0px;
     """,
@@ -193,14 +210,17 @@ DARK_THEME = {
     "add_button": """
         QPushButton {
             background-color: transparent;
-            color: #9F7AEA;
-            border: 1.5px solid #9F7AEA;
+            color: white;
+            border: 1.5px solid #666;
             border-radius: 15px;
             font-weight: bold;
             font-size: 18px;
         }
         QPushButton:hover {
-            background-color: rgba(159, 122, 234, 0.15);
+            background-color: #444;
+        }
+        QPushButton:pressed {
+            background-color: #555;
         }
     """,
 
@@ -208,13 +228,13 @@ DARK_THEME = {
     "market_item": """
         QFrame#ItemFrame {
             background-color: transparent;
-            border: 1px solid #2A2A2A;
+            border: 1px solid #2b2b2b;
             border-radius: 6px;
             padding: 2px;
         }
         QFrame#ItemFrame:hover {
             background-color: #252525;
-            border: 1px solid #3A3A3A;
+            border: 1px solid #3a3a3a;
         }
     """,
 
@@ -222,14 +242,14 @@ DARK_THEME = {
     "ticker_symbol": """
         font-weight: 600;
         font-size: 14px;
-        color: #FFFFFF;
+        color: white;
         border: none;
     """,
 
     # Cena
     "price_label": """
         font-size: 14px;
-        color: #E0E0E0;
+        color: white;
         border: none;
         font-weight: 500;
     """,
@@ -238,22 +258,28 @@ DARK_THEME = {
     "remove_button": """
         QPushButton {
             background-color: transparent;
-            color: #EA3943;
-            border: 1px solid #EA3943;
+            color: #EF4444;
+            border: 1px solid #EF4444;
             border-radius: 12px;
             font-weight: bold;
             font-size: 16px;
+            min-width: 25px;
+            max-width: 25px;
+            min-height: 25px;
+            max-height: 25px;
+            padding: 0px;
+            margin: 0px;
         }
         QPushButton:hover {
-            background-color: rgba(234, 57, 67, 0.15);
+            background-color: rgba(239, 68, 68, 0.15);
         }
     """,
 
     # Welcome Panel - przyciski akcji
     "action_button": """
         QPushButton {
-            background-color: #7000E3;
-            color: #FFFFFF;
+            background-color: #444;
+            color: white;
             border: none;
             border-radius: 8px;
             padding: 12px;
@@ -261,28 +287,31 @@ DARK_THEME = {
             font-size: 14px;
         }
         QPushButton:hover {
-            background-color: #8A2BE2;
+            background-color: #555;
+        }
+        QPushButton:pressed {
+            background-color: #666;
         }
     """,
 
     # Statystyki rynkowe (małe widgety)
     "stats_widget": """
         QFrame#StatWidget {
-            background-color: #2A2A2A;
-            border: 1px solid #3A3A3A;
+            background-color: #2b2b2b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
         }
         QFrame#StatWidget:hover {
             background-color: #303030;
-            border: 1px solid #4A4A4A;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
     """,
 
     # Info widget (status systemu)
     "info_widget": """
         QFrame#InfoWidget {
-            background-color: #2A2A2A;
-            border: 1px solid #3A3A3A;
+            background-color: #2b2b2b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 6px;
         }
     """,
@@ -291,14 +320,14 @@ DARK_THEME = {
     "value_label": """
         font-size: 16px;
         font-weight: 600;
-        color: #FFFFFF;
+        color: white;
         border: none;
     """,
 
     # Tytuły w stats widget
     "stats_title": """
         font-size: 11px;
-        color: #9B9B9B;
+        color: #999;
         border: none;
         font-weight: 500;
     """,
@@ -310,18 +339,20 @@ DARK_THEME = {
             border: none;
         }
         QScrollBar:vertical {
-            border: none;
-            background: #2A2A2A;
-            width: 8px;
-            border-radius: 4px;
+            background-color: #2b2b2b;
+            width: 12px;
+            border-radius: 6px;
         }
         QScrollBar::handle:vertical {
-            background: #4A4A4A;
-            border-radius: 4px;
+            background-color: #444;
+            border-radius: 6px;
             min-height: 20px;
         }
         QScrollBar::handle:vertical:hover {
-            background: #5A5A5A;
+            background-color: #555;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
         }
     """,
 

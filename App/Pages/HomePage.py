@@ -18,21 +18,8 @@ from Launcher.ConfigManager import ConfigManager
 # --- Helpery ---
 
 def get_tr(key):
+    """Pobiera tłumaczenie z pliku translations.py"""
     lang = AppState.get_language()
-    local_map = {
-        "welcome_title": {"English": "Your AI trading companion", "Polski": "Twój asystent AI"},
-        "open_repo": {"English": "Learn more", "Polski": "Dowiedz się więcej"},
-        "favorites_title": {"English": "Favorites", "Polski": "Ulubione"},
-        "market_indices_title": {"English": "Market Indices", "Polski": "Indeksy giełdowe"},
-        "add_ticker_msg": {"English": "Enter ticker symbol (e.g. NVDA, BTC-USD):",
-                           "Polski": "Podaj symbol (np. NVDA, BTC-USD):"},
-        "add_ticker_title": {"English": "Add Favorite", "Polski": "Dodaj Ulubione"},
-        "quick_actions": {"English": "QUICK ACTIONS", "Polski": "SZYBKIE AKCJE"},
-        "new_analysis": {"English": "New Analysis", "Polski": "Nowa analiza"},
-        "market_scan": {"English": "Market Scanner", "Polski": "Skaner rynku"},
-    }
-    if key in local_map:
-        return local_map[key].get(lang, local_map[key]["English"])
     return TRANSLATIONS.get(lang, {}).get(key, key)
 
 
@@ -43,21 +30,16 @@ def get_theme():
 # --- Rozszerzenie ConfigManager ---
 
 class HomeConfigExtension:
-    """Rozszerzenie ConfigManager o funkcje specyficzne dla Home"""
-
     @staticmethod
     def _get_favorites_path():
-        """Zwraca ścieżkę do pliku z ulubionymi"""
         return ConfigManager.APP_FOLDER_PATH / "Configs" / "favorites.txt"
 
     @staticmethod
     def _get_recently_analyzed_path():
-        """Zwraca ścieżkę do pliku z ostatnio analizowanymi"""
         return ConfigManager.APP_FOLDER_PATH / "Configs" / "recently_analyzed.txt"
 
     @staticmethod
     def load_favorites():
-        """Wczytuje ulubione symbole z pliku txt"""
         favorites_path = HomeConfigExtension._get_favorites_path()
 
         if not favorites_path.exists():
@@ -75,7 +57,6 @@ class HomeConfigExtension:
 
     @staticmethod
     def save_favorites(tickers):
-        """Zapisuje ulubione symbole do pliku txt"""
         try:
             favorites_path = HomeConfigExtension._get_favorites_path()
             favorites_path.parent.mkdir(parents=True, exist_ok=True)
@@ -90,7 +71,6 @@ class HomeConfigExtension:
 
     @staticmethod
     def add_recently_analyzed(ticker):
-        """Dodaje symbol do ostatnio analizowanych"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         recently_path = HomeConfigExtension._get_recently_analyzed_path()
 
@@ -161,8 +141,6 @@ class MarketWorker(QThread):
 # --- Widgety ---
 
 class MarketItemWidget(QFrame):
-    """Pojedynczy wiersz z akcją/walutą"""
-
     def __init__(self, symbol, display_name=None, removable=False, on_remove=None):
         super().__init__()
         self.setObjectName("ItemFrame")
@@ -190,7 +168,7 @@ class MarketItemWidget(QFrame):
 
         if removable and on_remove:
             self.btn_remove = QPushButton("🗑️")
-            self.btn_remove.setFixedSize(32, 32)
+            self.btn_remove.setFixedSize(25, 25)
             self.btn_remove.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
             self.btn_remove.setCursor(Qt.PointingHandCursor)
             self.btn_remove.clicked.connect(lambda: on_remove(symbol))
@@ -210,7 +188,6 @@ class MarketItemWidget(QFrame):
         self.lbl_price.setText(price_str)
         self.lbl_change.setText(f"{change:+.2f}%")
 
-        # Kolory
         color = theme["positive_color"] if change >= 0 else theme["negative_color"]
         self.lbl_change.setStyleSheet(f"color: {color}; font-weight: 600; font-size: 14px; border: none;")
 
@@ -228,8 +205,6 @@ class MarketItemWidget(QFrame):
 
 
 class CardFrame(QFrame):
-    """Ramka główna panelu (Karta)"""
-
     def __init__(self):
         super().__init__()
         self.setObjectName("Card")
@@ -242,8 +217,6 @@ class CardFrame(QFrame):
 
 
 class FavoritesPanel(CardFrame):
-    """Panel z ulubionymi"""
-
     def __init__(self):
         super().__init__()
         self.tickers = HomeConfigExtension.load_favorites()
@@ -253,7 +226,6 @@ class FavoritesPanel(CardFrame):
         layout.setSpacing(15)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Nagłówek
         header_lay = QHBoxLayout()
         self.lbl_title = QLabel(get_tr("favorites_title").upper())
         self.lbl_title.setAlignment(Qt.AlignLeft)
@@ -268,7 +240,7 @@ class FavoritesPanel(CardFrame):
         header_lay.addWidget(self.btn_add)
         layout.addLayout(header_lay)
 
-        # Lista
+
         self.list_container = QWidget()
         self.list_layout = QVBoxLayout(self.list_container)
         self.list_layout.setContentsMargins(0, 0, 0, 0)
@@ -331,15 +303,12 @@ class FavoritesPanel(CardFrame):
         self.lbl_title.setStyleSheet(theme["section_header"])
         self.btn_add.setStyleSheet(theme["add_button"])
 
-        # Scroll area
         scroll = self.findChild(QScrollArea)
         if scroll:
             scroll.setStyleSheet(theme["scroll_area"])
 
 
 class MarketIndicesPanel(CardFrame):
-    """Panel z indeksami giełdowymi"""
-
     def __init__(self):
         super().__init__()
 
@@ -412,7 +381,7 @@ class MarketIndicesPanel(CardFrame):
 
 
 class WelcomePanel(CardFrame):
-    """Panel powitalny z quick actions"""
+    """Panel powitalny"""
 
     def __init__(self):
         super().__init__()
@@ -422,63 +391,50 @@ class WelcomePanel(CardFrame):
         layout.setSpacing(20)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Logo i tytuł
-        header = QHBoxLayout()
+        # Logo i podpis
+        logo_layout = QVBoxLayout()
+        logo_layout.setAlignment(Qt.AlignCenter)
+        logo_layout.setSpacing(10)
+
+        # Logo
         self.logo = QLabel()
-        pixmap = QPixmap(":/Launcher/Icons/Logo.png")
-        if not pixmap.isNull():
-            self.logo.setPixmap(pixmap.scaled(70, 70, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        else:
-            self.logo.setText("📈")
-            self.logo.setStyleSheet("font-size: 50px; border: none;")
+        self.logo.setAlignment(Qt.AlignCenter)
         self.logo.setStyleSheet("border: none;")
 
-        title_layout = QVBoxLayout()
-        title_layout.setSpacing(5)
-
-        self.lbl_title = QLabel("HOSSAnna")
-
+        # Subtitle pod logo
         self.lbl_subtitle = QLabel(get_tr("welcome_title"))
+        self.lbl_subtitle.setAlignment(Qt.AlignCenter)
 
-        title_layout.addWidget(self.lbl_title)
-        title_layout.addWidget(self.lbl_subtitle)
+        logo_layout.addWidget(self.logo)
+        logo_layout.addWidget(self.lbl_subtitle)
 
-        header.addWidget(self.logo)
-        header.addLayout(title_layout)
-        header.addStretch()
+        layout.addLayout(logo_layout)
 
-        layout.addLayout(header)
-        layout.addSpacing(30)
+        # Spacer - wypycha przycisk na dół
+        layout.addStretch()
 
-        # Quick Actions
-        self.actions_label = QLabel(get_tr("quick_actions"))
-        layout.addWidget(self.actions_label)
-
-        actions_layout = QVBoxLayout()
-        actions_layout.setSpacing(12)
-
-        self.btn_analysis = QPushButton(f"🔍  {get_tr('new_analysis')}")
-        self.btn_analysis.setCursor(Qt.PointingHandCursor)
-        self.btn_analysis.setMinimumHeight(50)
-
-        self.btn_scanner = QPushButton(f"📊  {get_tr('market_scan')}")
-        self.btn_scanner.setCursor(Qt.PointingHandCursor)
-        self.btn_scanner.setMinimumHeight(50)
-
+        # Przycisk na dole
         self.btn_repo = QPushButton(f"🌐  {get_tr('open_repo')}")
         self.btn_repo.setCursor(Qt.PointingHandCursor)
         self.btn_repo.setMinimumHeight(50)
         self.btn_repo.clicked.connect(self.open_repo)
-
-        actions_layout.addWidget(self.btn_analysis)
-        actions_layout.addWidget(self.btn_scanner)
-        actions_layout.addWidget(self.btn_repo)
-
-        layout.addLayout(actions_layout)
-        layout.addStretch()
+        layout.addWidget(self.btn_repo)
 
         AppState.state_changed.connect(self.update_ui)
         self.update_ui()
+
+    def update_logo(self):
+        """Aktualizuje logo w zależności od motywu"""
+        is_dark = AppState.get_theme() == "dark"
+        logo_path = ":/Launcher/Icons/LogoDarkTheme.png" if is_dark else ":/Launcher/Icons/Logo.png"
+
+        pixmap = QPixmap(logo_path)
+        if not pixmap.isNull():
+            self.logo.setPixmap(pixmap.scaled(256, 256, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        else:
+            # Fallback jeśli logo nie zostanie załadowane
+            self.logo.setText("📈")
+            self.logo.setStyleSheet("font-size: 80px; border: none;")
 
     def open_repo(self):
         QDesktopServices.openUrl(QUrl("https://github.com/vGiacomov/HOSSAnna---AI-tools-for-market-trend-analysis"))
@@ -487,29 +443,17 @@ class WelcomePanel(CardFrame):
         theme = get_theme()
         is_dark = AppState.get_theme() == "dark"
 
-        self.lbl_subtitle.setText(get_tr("welcome_title"))
-        self.actions_label.setText(get_tr("quick_actions"))
-
-        # Tytuł
-        title_color = "#FFFFFF" if is_dark else "#1A1A1A"
-        self.lbl_title.setStyleSheet(f"font-size: 28px; font-weight: 700; color: {title_color}; border: none;")
+        # Aktualizuj logo
+        self.update_logo()
 
         # Subtitle
+        self.lbl_subtitle.setText(get_tr("welcome_title"))
         subtitle_color = "#9B9B9B" if is_dark else "#6B6B6B"
-        self.lbl_subtitle.setStyleSheet(f"font-size: 14px; color: {subtitle_color}; border: none;")
+        self.lbl_subtitle.setStyleSheet(f"font-size: 16px; color: {subtitle_color}; border: none; font-weight: 500;")
 
-        # Actions label
-        self.actions_label.setStyleSheet(theme["section_header"])
-
-        # Przyciski
-        self.btn_analysis.setText(f"🔍  {get_tr('new_analysis')}")
-        self.btn_scanner.setText(f"📊  {get_tr('market_scan')}")
+        # Przycisk
         self.btn_repo.setText(f"🌐  {get_tr('open_repo')}")
-
-        btn_style = theme["action_button"]
-        self.btn_analysis.setStyleSheet(btn_style)
-        self.btn_scanner.setStyleSheet(btn_style)
-        self.btn_repo.setStyleSheet(btn_style)
+        self.btn_repo.setStyleSheet(theme["action_button"])
 
 
 # --- Główny Widget Home ---
@@ -522,13 +466,8 @@ class HomeWidget(QWidget):
         layout.setSpacing(20)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Welcome Panel (Lewo) - 30%
         self.welcome = WelcomePanel()
-
-        # Favorites Panel (Środek) - 35%
         self.favorites = FavoritesPanel()
-
-        # Market Indices (Prawo) - 35%
         self.market_indices = MarketIndicesPanel()
 
         layout.addWidget(self.welcome, 3)

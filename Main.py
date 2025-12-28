@@ -65,8 +65,6 @@ tf.get_logger().setLevel("ERROR")
 
 
 
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("Icons/Logo.ico"))

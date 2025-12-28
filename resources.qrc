@@ -4,6 +4,7 @@
 
     <file>Icons/Logo.ico</file>
     <file>Launcher/Icons/Logo.png</file>
+     <file>Launcher/Icons/LogoDarkTheme.png</file>
 
     <file>App/Icons/home.png</file>
     <file>App/Icons/prediction.png</file>

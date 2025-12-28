@@ -1,15 +1,3 @@
-
-
-languagesList = {
-    "English",
-    "Polski",
-    "Français",
-    "Deutsch",
-    "Español",
-    "Italiano",
-    "עברית",
-}
-
 TRANSLATIONS = {
     "English": {
         # Settings
@@ -41,7 +29,15 @@ TRANSLATIONS = {
         "error_prediction": "Error during prediction calculation",
         "prediction_chart_title": "{symbol} - Candlestick Chart with Prediction",
         "price_label": "Price",
-        "placeholder_message": "Enter a stock symbol and click Calculate"
+        "placeholder_message": "Enter a stock symbol and click Calculate",
+
+        # Home page
+        "welcome_title": "Your AI trading companion",
+        "open_repo": "Learn More",
+        "favorites_title": "Favorites",
+        "market_indices_title": "Market Indices",
+        "add_ticker_msg": "Enter ticker symbol (e.g. NVDA, BTC-USD):",
+        "add_ticker_title": "Add Favorite",
     },
 
     "Polski": {
@@ -74,7 +70,15 @@ TRANSLATIONS = {
         "error_prediction": "Błąd podczas obliczania predykcji",
         "prediction_chart_title": "{symbol} – Wykres świecowy z predykcją",
         "price_label": "Cena",
-        "placeholder_message": "Wprowadź symbol akcji i kliknij Oblicz"
+        "placeholder_message": "Wprowadź symbol akcji i kliknij Oblicz",
+
+        # Strona główna
+        "welcome_title": "Twój asystent AI w tradingu",
+        "open_repo": "Dowiedz Się Więcej",
+        "favorites_title": "Ulubione",
+        "market_indices_title": "Indeksy giełdowe",
+        "add_ticker_msg": "Podaj symbol (np. NVDA, BTC-USD):",
+        "add_ticker_title": "Dodaj Ulubione",
     },
 
     "Deutsch": {
@@ -107,7 +111,15 @@ TRANSLATIONS = {
         "error_prediction": "Fehler bei der Vorhersageberechnung",
         "prediction_chart_title": "{symbol} - Kerzenchart mit Vorhersage",
         "price_label": "Preis",
-        "placeholder_message": "Geben Sie ein Aktiensymbol ein und klicken Sie auf Berechnen"
+        "placeholder_message": "Geben Sie ein Aktiensymbol ein und klicken Sie auf Berechnen",
+
+        # Startseite
+        "welcome_title": "Ihr KI-Trading-Assistent",
+        "open_repo": "Mehr Erfahren",
+        "favorites_title": "Favoriten",
+        "market_indices_title": "Marktindizes",
+        "add_ticker_msg": "Ticker-Symbol eingeben (z.B. NVDA, BTC-USD):",
+        "add_ticker_title": "Favorit hinzufügen",
     },
 
     "Français": {
@@ -140,7 +152,15 @@ TRANSLATIONS = {
         "error_prediction": "Erreur lors du calcul de la prédiction",
         "prediction_chart_title": "{symbol} - Graphique en chandelier avec prédiction",
         "price_label": "Prix",
-        "placeholder_message": "Saisissez un symbole boursier et cliquez sur Calculer"
+        "placeholder_message": "Saisissez un symbole boursier et cliquez sur Calculer",
+
+        # Page d'accueil
+        "welcome_title": "Votre assistant IA de trading",
+        "open_repo": "En Savoir Plus",
+        "favorites_title": "Favoris",
+        "market_indices_title": "Indices boursiers",
+        "add_ticker_msg": "Entrez le symbole (ex. NVDA, BTC-USD):",
+        "add_ticker_title": "Ajouter un favori",
     },
 
     "Español": {
@@ -173,7 +193,15 @@ TRANSLATIONS = {
         "error_prediction": "Error durante el cálculo de predicción",
         "prediction_chart_title": "{symbol} - Gráfico de velas con predicción",
         "price_label": "Precio",
-        "placeholder_message": "Introduce un símbolo bursátil y haz clic en Calcular"
+        "placeholder_message": "Introduce un símbolo bursátil y haz clic en Calcular",
+
+        # Página de inicio
+        "welcome_title": "Tu asistente de IA para trading",
+        "open_repo": "Más Información",
+        "favorites_title": "Favoritos",
+        "market_indices_title": "Índices de mercado",
+        "add_ticker_msg": "Ingrese símbolo (ej. NVDA, BTC-USD):",
+        "add_ticker_title": "Agregar favorito",
     },
 
     "Italiano": {
@@ -206,7 +234,15 @@ TRANSLATIONS = {
         "error_prediction": "Errore durante il calcolo della previsione",
         "prediction_chart_title": "{symbol} - Grafico a candele con previsione",
         "price_label": "Prezzo",
-        "placeholder_message": "Inserisci un simbolo azionario e fai clic su Calcola"
+        "placeholder_message": "Inserisci un simbolo azionario e fai clic su Calcola",
+
+        # Pagina iniziale
+        "welcome_title": "Il tuo assistente AI per il trading",
+        "open_repo": "Scopri di Più",
+        "favorites_title": "Preferiti",
+        "market_indices_title": "Indici di mercato",
+        "add_ticker_msg": "Inserisci simbolo (es. NVDA, BTC-USD):",
+        "add_ticker_title": "Aggiungi preferito",
     },
 
     "עברית": {
@@ -239,6 +275,14 @@ TRANSLATIONS = {
         "error_prediction": "שגיאה במהלך חישוב החיזוי",
         "prediction_chart_title": "גרף נרות עם חיזוי - {symbol}",
         "price_label": "מחיר",
-        "placeholder_message": "הזן סמל מניה ולחץ על חישוב"
+        "placeholder_message": "הזן סמל מניה ולחץ על חישוב",
+
+        # דף הבית
+        "welcome_title": "עוזר המסחר AI שלך",
+        "open_repo": "למד עוד",
+        "favorites_title": "מועדפים",
+        "market_indices_title": "מדדי שוק",
+        "add_ticker_msg": ":הזן סמל (לדוגמה NVDA, BTC-USD)",
+        "add_ticker_title": "הוסף מועדף",
     }
 }
