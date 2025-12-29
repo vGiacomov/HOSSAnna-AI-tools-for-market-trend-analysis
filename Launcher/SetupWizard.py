@@ -323,14 +323,13 @@ class SetupWizard(QWidget):
         InitialSettings.set_first_start_value(True)
 
         # Tworzymy strukturę AppData
-        ConfigManager.create_appdata_structure(AppSettings.app_folder_path())
+        ConfigManager.create_appdata_structure()
 
         # Zapis konfiguracji
         ConfigManager.save_config(
             language=self.selected_language,
             theme=self.selected_theme,
             terms_accepted=self.terms_accepted,
-            app_folder_path=AppSettings.app_folder_path()
         )
 
         self.finished.emit()

@@ -8,7 +8,7 @@ class ConfigManager:
 
 
     @staticmethod
-    def create_appdata_structure() -> bool:
+    def create_appdata_structure():
         try:
             (ConfigManager.APP_FOLDER_PATH / "Configs").mkdir(parents=True, exist_ok=True)
             (ConfigManager.APP_FOLDER_PATH / "logs").mkdir(parents=True, exist_ok=True)
