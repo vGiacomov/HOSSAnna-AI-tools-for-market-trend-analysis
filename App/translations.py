@@ -1,6 +1,5 @@
 TRANSLATIONS = {
     "English": {
-        # Settings
         "settings_title": "Settings",
         "language_label": "Language:",
         "theme_label": "Theme:",
@@ -11,7 +10,6 @@ TRANSLATIONS = {
         "success_title": "Success",
         "settings_applied": "Settings applied successfully!",
 
-        # Prediction module
         "prediction_title": "Stock Price Prediction",
         "symbol_label": "Stock Symbol:",
         "symbol_placeholder": "Enter symbol (e.g., NVDA, AAPL)",
@@ -31,7 +29,6 @@ TRANSLATIONS = {
         "price_label": "Price",
         "placeholder_message": "Enter a stock symbol and click Calculate",
 
-        # Home page
         "welcome_title": "Your AI trading companion",
         "open_repo": "Learn More",
         "favorites_title": "Favorites",
@@ -41,7 +38,6 @@ TRANSLATIONS = {
     },
 
     "Polski": {
-        # Ustawienia
         "settings_title": "Ustawienia",
         "language_label": "Język:",
         "theme_label": "Motyw:",
@@ -52,7 +48,6 @@ TRANSLATIONS = {
         "success_title": "Sukces",
         "settings_applied": "Ustawienia zastosowane pomyślnie!",
 
-        # Moduł predykcji
         "prediction_title": "Predykcja Cen Akcji",
         "symbol_label": "Symbol Spółki:",
         "symbol_placeholder": "Wpisz symbol (np. NVDA, AAPL)",
@@ -72,7 +67,6 @@ TRANSLATIONS = {
         "price_label": "Cena",
         "placeholder_message": "Wprowadź symbol akcji i kliknij Oblicz",
 
-        # Strona główna
         "welcome_title": "Twój asystent AI w tradingu",
         "open_repo": "Dowiedz Się Więcej",
         "favorites_title": "Ulubione",
@@ -82,7 +76,6 @@ TRANSLATIONS = {
     },
 
     "Deutsch": {
-        # Einstellungen
         "settings_title": "Einstellungen",
         "language_label": "Sprache:",
         "theme_label": "Thema:",
@@ -93,7 +86,6 @@ TRANSLATIONS = {
         "success_title": "Erfolg",
         "settings_applied": "Einstellungen erfolgreich angewendet!",
 
-        # Vorhersagemodul
         "prediction_title": "Aktienkursvorhersage",
         "symbol_label": "Aktiensymbol:",
         "symbol_placeholder": "Symbol eingeben (z.B. NVDA, AAPL)",
@@ -113,7 +105,6 @@ TRANSLATIONS = {
         "price_label": "Preis",
         "placeholder_message": "Geben Sie ein Aktiensymbol ein und klicken Sie auf Berechnen",
 
-        # Startseite
         "welcome_title": "Ihr KI-Trading-Assistent",
         "open_repo": "Mehr Erfahren",
         "favorites_title": "Favoriten",
@@ -123,7 +114,6 @@ TRANSLATIONS = {
     },
 
     "Français": {
-        # Paramètres
         "settings_title": "Paramètres",
         "language_label": "Langue:",
         "theme_label": "Thème:",
@@ -134,7 +124,6 @@ TRANSLATIONS = {
         "success_title": "Succès",
         "settings_applied": "Paramètres appliqués avec succès!",
 
-        # Module de prédiction
         "prediction_title": "Prédiction du Prix des Actions",
         "symbol_label": "Symbole Boursier:",
         "symbol_placeholder": "Entrez le symbole (ex. NVDA, AAPL)",
@@ -154,7 +143,6 @@ TRANSLATIONS = {
         "price_label": "Prix",
         "placeholder_message": "Saisissez un symbole boursier et cliquez sur Calculer",
 
-        # Page d'accueil
         "welcome_title": "Votre assistant IA de trading",
         "open_repo": "En Savoir Plus",
         "favorites_title": "Favoris",
@@ -164,7 +152,6 @@ TRANSLATIONS = {
     },
 
     "Español": {
-        # Configuración
         "settings_title": "Configuración",
         "language_label": "Idioma:",
         "theme_label": "Tema:",
@@ -175,7 +162,6 @@ TRANSLATIONS = {
         "success_title": "Éxito",
         "settings_applied": "¡Configuración aplicada correctamente!",
 
-        # Módulo de predicción
         "prediction_title": "Predicción de Precio de Acciones",
         "symbol_label": "Símbolo de Acción:",
         "symbol_placeholder": "Ingrese símbolo (ej. NVDA, AAPL)",
@@ -195,7 +181,6 @@ TRANSLATIONS = {
         "price_label": "Precio",
         "placeholder_message": "Introduce un símbolo bursátil y haz clic en Calcular",
 
-        # Página de inicio
         "welcome_title": "Tu asistente de IA para trading",
         "open_repo": "Más Información",
         "favorites_title": "Favoritos",
@@ -205,7 +190,6 @@ TRANSLATIONS = {
     },
 
     "Italiano": {
-        # Impostazioni
         "settings_title": "Impostazioni",
         "language_label": "Lingua:",
         "theme_label": "Tema:",
@@ -216,7 +200,6 @@ TRANSLATIONS = {
         "success_title": "Successo",
         "settings_applied": "Impostazioni applicate con successo!",
 
-        # Modulo di previsione
         "prediction_title": "Previsione Prezzo Azioni",
         "symbol_label": "Simbolo Azionario:",
         "symbol_placeholder": "Inserisci simbolo (es. NVDA, AAPL)",
@@ -236,7 +219,6 @@ TRANSLATIONS = {
         "price_label": "Prezzo",
         "placeholder_message": "Inserisci un simbolo azionario e fai clic su Calcola",
 
-        # Pagina iniziale
         "welcome_title": "Il tuo assistente AI per il trading",
         "open_repo": "Scopri di Più",
         "favorites_title": "Preferiti",
@@ -245,44 +227,205 @@ TRANSLATIONS = {
         "add_ticker_title": "Aggiungi preferito",
     },
 
-    "עברית": {
-        # הגדרות
-        "settings_title": "הגדרות",
-        "language_label": ":שפה",
-        "theme_label": ":ערכת נושא",
-        "theme_light": "בהיר",
-        "theme_dark": "כהה",
-        "apply_button": "החל",
-        "cancel_button": "ביטול",
-        "success_title": "הצלחה",
-        "settings_applied": "!ההגדרות הוחלו בהצלחה",
+    "Português": {
+        "settings_title": "Configurações",
+        "language_label": "Idioma:",
+        "theme_label": "Tema:",
+        "theme_light": "Claro",
+        "theme_dark": "Escuro",
+        "apply_button": "Aplicar",
+        "cancel_button": "Cancelar",
+        "success_title": "Sucesso",
+        "settings_applied": "Configurações aplicadas com sucesso!",
 
-        # מודול חיזוי
-        "prediction_title": "חיזוי מחיר מניות",
-        "symbol_label": ":סמל מניה",
-        "symbol_placeholder": "(למשל NVDA, AAPL) הזן סמל",
-        "enter_symbol_placeholder": "למשל AAPL",
-        "prediction_range": ":טווח חיזוי",
-        "calculate_button": "חשב חיזוי",
-        "current_price": "מחיר נוכחי",
-        "predicted_price": "מחיר צפוי",
-        "prediction_accuracy": "דיוק",
-        "loading": "...טוען נתונים",
-        "calculating": "...מחשב חיזוי",
-        "error_title": "שגיאה",
-        "error_no_symbol": "אנא הזן סמל מניה",
-        "error_loading_data": "{symbol} :שגיאה בטעינת נתונים עבור סמל",
-        "error_prediction": "שגיאה במהלך חישוב החיזוי",
-        "prediction_chart_title": "גרף נרות עם חיזוי - {symbol}",
-        "price_label": "מחיר",
-        "placeholder_message": "הזן סמל מניה ולחץ על חישוב",
+        "prediction_title": "Previsão de Preço de Ações",
+        "symbol_label": "Símbolo da Ação:",
+        "symbol_placeholder": "Digite o símbolo (ex. NVDA, AAPL)",
+        "enter_symbol_placeholder": "ex. AAPL",
+        "prediction_range": "Intervalo de Previsão:",
+        "calculate_button": "Calcular Previsão",
+        "current_price": "Preço Atual",
+        "predicted_price": "Preço Previsto",
+        "prediction_accuracy": "Precisão",
+        "loading": "Carregando dados...",
+        "calculating": "Calculando previsão...",
+        "error_title": "Erro",
+        "error_no_symbol": "Por favor, insira um símbolo de ação",
+        "error_loading_data": "Erro ao carregar dados para o símbolo: {symbol}",
+        "error_prediction": "Erro durante o cálculo da previsão",
+        "prediction_chart_title": "{symbol} - Gráfico de velas com previsão",
+        "price_label": "Preço",
+        "placeholder_message": "Digite um símbolo e clique em Calcular",
 
-        # דף הבית
-        "welcome_title": "עוזר המסחר AI שלך",
-        "open_repo": "למד עוד",
-        "favorites_title": "מועדפים",
-        "market_indices_title": "מדדי שוק",
-        "add_ticker_msg": ":הזן סמל (לדוגמה NVDA, BTC-USD)",
-        "add_ticker_title": "הוסף מועדף",
-    }
+        "welcome_title": "Seu assistente de trading com IA",
+        "open_repo": "Saiba Mais",
+        "favorites_title": "Favoritos",
+        "market_indices_title": "Índices de mercado",
+        "add_ticker_msg": "Digite o símbolo (ex. NVDA, BTC-USD):",
+        "add_ticker_title": "Adicionar favorito",
+    },
+
+    "中文": {
+        "settings_title": "设置",
+        "language_label": "语言：",
+        "theme_label": "主题：",
+        "theme_light": "浅色",
+        "theme_dark": "深色",
+        "apply_button": "应用",
+        "cancel_button": "取消",
+        "success_title": "成功",
+        "settings_applied": "设置已成功应用！",
+
+        "prediction_title": "股票价格预测",
+        "symbol_label": "股票代码：",
+        "symbol_placeholder": "输入代码（如 NVDA, AAPL）",
+        "enter_symbol_placeholder": "例如 AAPL",
+        "prediction_range": "预测范围：",
+        "calculate_button": "计算预测",
+        "current_price": "当前价格",
+        "predicted_price": "预测价格",
+        "prediction_accuracy": "准确率",
+        "loading": "正在加载数据...",
+        "calculating": "正在计算预测...",
+        "error_title": "错误",
+        "error_no_symbol": "请输入股票代码",
+        "error_loading_data": "加载股票数据出错：{symbol}",
+        "error_prediction": "预测计算出错",
+        "prediction_chart_title": "{symbol} - 含预测的K线图",
+        "price_label": "价格",
+        "placeholder_message": "请输入股票代码并点击计算",
+
+        "welcome_title": "你的 AI 交易助手",
+        "open_repo": "了解更多",
+        "favorites_title": "收藏",
+        "market_indices_title": "市场指数",
+        "add_ticker_msg": "输入代码（如 NVDA, BTC-USD）：",
+        "add_ticker_title": "添加收藏",
+    },
+
+    "हिन्दी": {
+        "settings_title": "सेटिंग्स",
+        "language_label": "भाषा:",
+        "theme_label": "थीम:",
+        "theme_light": "हल्की",
+        "theme_dark": "गहरी",
+        "apply_button": "लागू करें",
+        "cancel_button": "रद्द करें",
+        "success_title": "सफलता",
+        "settings_applied": "सेटिंग्स सफलतापूर्वक लागू हुईं!",
+
+        "prediction_title": "स्टॉक मूल्य पूर्वानुमान",
+        "symbol_label": "स्टॉक प्रतीक:",
+        "symbol_placeholder": "प्रतीक दर्ज करें (जैसे NVDA, AAPL)",
+        "enter_symbol_placeholder": "जैसे AAPL",
+        "prediction_range": "पूर्वानुमान सीमा:",
+        "calculate_button": "पूर्वानुमान निकालें",
+        "current_price": "वर्तमान मूल्य",
+        "predicted_price": "अनुमानित मूल्य",
+        "prediction_accuracy": "सटीकता",
+        "loading": "डेटा लोड हो रहा है...",
+        "calculating": "पूर्वानुमान की गणना...",
+        "error_title": "त्रुटि",
+        "error_no_symbol": "कृपया स्टॉक प्रतीक दर्ज करें",
+        "error_loading_data": "{symbol} के लिए डेटा लोड करने में त्रुटि",
+        "error_prediction": "पूर्वानुमान गणना में त्रुटि",
+        "prediction_chart_title": "{symbol} - पूर्वानुमान सहित चार्ट",
+        "price_label": "मूल्य",
+        "placeholder_message": "स्टॉक प्रतीक दर्ज करें और गणना करें",
+
+        "welcome_title": "आपका AI ट्रेडिंग सहायक",
+        "open_repo": "और जानें",
+        "favorites_title": "पसंदीदा",
+        "market_indices_title": "बाजार सूचकांक",
+        "add_ticker_msg": "प्रतीक दर्ज करें (जैसे NVDA, BTC-USD):",
+        "add_ticker_title": "पसंदीदा जोड़ें",
+    },
+
+    "日本語": {
+        "settings_title": "設定",
+        "language_label": "言語：",
+        "theme_label": "テーマ：",
+        "theme_light": "ライト",
+        "theme_dark": "ダーク",
+        "apply_button": "適用",
+        "cancel_button": "キャンセル",
+        "success_title": "成功",
+        "settings_applied": "設定が正常に適用されました！",
+
+        "prediction_title": "株価予測",
+        "symbol_label": "銘柄コード：",
+        "symbol_placeholder": "コードを入力（例：NVDA, AAPL）",
+        "enter_symbol_placeholder": "例：AAPL",
+        "prediction_range": "予測範囲：",
+        "calculate_button": "予測を計算",
+        "current_price": "現在価格",
+        "predicted_price": "予測価格",
+        "prediction_accuracy": "精度",
+        "loading": "データを読み込み中...",
+        "calculating": "予測を計算中...",
+        "error_title": "エラー",
+        "error_no_symbol": "銘柄コードを入力してください",
+        "error_loading_data": "データ読み込みエラー：{symbol}",
+        "error_prediction": "予測計算エラー",
+        "prediction_chart_title": "{symbol} - 予測付きローソク足チャート",
+        "price_label": "価格",
+        "placeholder_message": "銘柄コードを入力して計算してください",
+
+        "welcome_title": "あなたのAIトレーディングアシスタント",
+        "open_repo": "詳細を見る",
+        "favorites_title": "お気に入り",
+        "market_indices_title": "市場指数",
+        "add_ticker_msg": "コードを入力（例：NVDA, BTC-USD）：",
+        "add_ticker_title": "お気に入り追加",
+    },
+
+    "Русский": {
+        "settings_title": "Настройки",
+        "language_label": "Язык:",
+        "theme_label": "Тема:",
+        "theme_light": "Светлая",
+        "theme_dark": "Тёмная",
+        "apply_button": "Применить",
+        "cancel_button": "Отмена",
+        "success_title": "Успех",
+        "settings_applied": "Настройки успешно применены!",
+
+        "prediction_title": "Прогноз цены акций",
+        "symbol_label": "Тикер:",
+        "symbol_placeholder": "Введите тикер (например NVDA, AAPL)",
+        "enter_symbol_placeholder": "например AAPL",
+        "prediction_range": "Диапазон прогноза:",
+        "calculate_button": "Рассчитать прогноз",
+        "current_price": "Текущая цена",
+        "predicted_price": "Прогнозируемая цена",
+        "prediction_accuracy": "Точность",
+        "loading": "Загрузка данных...",
+        "calculating": "Расчёт прогноза...",
+        "error_title": "Ошибка",
+        "error_no_symbol": "Введите тикер акции",
+        "error_loading_data": "Ошибка загрузки данных для тикера: {symbol}",
+        "error_prediction": "Ошибка при расчёте прогноза",
+        "prediction_chart_title": "{symbol} - Свечной график с прогнозом",
+        "price_label": "Цена",
+        "placeholder_message": "Введите тикер и нажмите Рассчитать",
+
+        "welcome_title": "Ваш AI-помощник для трейдинга",
+        "open_repo": "Узнать больше",
+        "favorites_title": "Избранное",
+        "market_indices_title": "Рыночные индексы",
+        "add_ticker_msg": "Введите тикер (например NVDA, BTC-USD):",
+        "add_ticker_title": "Добавить в избранное",
+    },
+    "العربية": {
+        "settings_title": "الإعدادات",
+        "language_label": "اللغة:",
+        "theme_label": "السمة:",
+        "theme_light": "فاتح",
+        "theme_dark": "داكن",
+        "apply_button": "تطبيق",
+        "cancel_button": "إلغاء",
+        "success_title": "نجاح",
+        "settings_applied": "تم تطبيق الإعدادات بنجاح!",
+    },
+
 }

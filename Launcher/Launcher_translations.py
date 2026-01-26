@@ -1,15 +1,3 @@
-
-languagesList ={
-    "English",
-    "Polski",
-    "Français",
-    "Deutsch",
-    "Español",
-    "Italiano",
-    "עברית",
-}
-
-
 TRANSLATIONS = {
     "English": {
         "select_language": "Select Language",
@@ -47,7 +35,6 @@ TRANSLATIONS = {
         "finish": "Terminer la configuration",
         "theme_info": "Choisissez un thème et confirmez avec le bouton 'Suivant'.",
     },
-
     "Deutsch": {
         "select_language": "Sprache auswählen",
         "next": "Weiter →",
@@ -84,7 +71,6 @@ TRANSLATIONS = {
         "finish": "Termina configurazione",
         "theme_info": "Scegli un tema e conferma con il pulsante 'Avanti'.",
     },
-
     "עברית": {
         "select_language": "בחר שפה",
         "next": "הבא →",
@@ -95,6 +81,79 @@ TRANSLATIONS = {
         "terms_accept": "✓ קראתי ואני מאשר את תנאי השימוש",
         "setup_done": "ההגדרה הסתיימה!",
         "finish": "סיים הגדרה",
-        "theme_info": "בחר ערכת נושא ואשר באמצעות כפתור 'הבא'."
+        "theme_info": "בחר ערכת נושא ואשר באמצעות כפתור 'הבא'.",
     },
+    "中文": {
+        "select_language": "选择语言",
+        "next": "下一步 →",
+        "back": "← 返回",
+        "select_theme": "选择主题",
+        "terms_title": "使用条款",
+        "terms_scroll_info": " 滚动到底部以解锁接受复选框",
+        "terms_accept": "✓ 我已阅读并接受使用条款",
+        "setup_done": "设置完成！",
+        "finish": "完成设置",
+        "theme_info": "选择主题并使用“下一步”按钮确认。",
+    },
+    "हिन्दी": {
+        "select_language": "भाषा चुनें",
+        "next": "अगला →",
+        "back": "← पीछे",
+        "select_theme": "थीम चुनें",
+        "terms_title": "उपयोग की शर्तें",
+        "terms_scroll_info": " स्वीकृति चेकबॉक्स अनलॉक करने के लिए अंत तक स्क्रॉल करें",
+        "terms_accept": "✓ मैंने उपयोग की शर्तें पढ़ी और स्वीकार करता हूँ",
+        "setup_done": "सेटअप पूरा!",
+        "finish": "सेटअप समाप्त करें",
+        "theme_info": "'अगला' बटन से थीम चुनें और पुष्टि करें।",
+    },
+    "日本語": {
+        "select_language": "言語を選択",
+        "next": "次へ →",
+        "back": "← 戻る",
+        "select_theme": "テーマを選択",
+        "terms_title": "利用規約",
+        "terms_scroll_info": " 末尾までスクロールして承認チェックボックスを解除",
+        "terms_accept": "✓ 利用規約を読み、同意します",
+        "setup_done": "セットアップ完了！",
+        "finish": "セットアップ完了",
+        "theme_info": "テーマを選択し、「次へ」ボタンで確認してください。",
+    },
+    "Русский": {
+        "select_language": "Выберите язык",
+        "next": "Далее →",
+        "back": "← Назад",
+        "select_theme": "Выберите тему",
+        "terms_title": "Условия использования",
+        "terms_scroll_info": " Прокрутите до конца, чтобы разблокировать галочку принятия",
+        "terms_accept": "✓ Я прочитал и принимаю условия использования",
+        "setup_done": "Настройка завершена!",
+        "finish": "Завершить настройку",
+        "theme_info": "Выберите тему и подтвердите кнопкой «Далее».",
+    },
+    "Português": {
+        "select_language": "Selecionar Idioma",
+        "next": "Próximo →",
+        "back": "← Voltar",
+        "select_theme": "Selecionar Tema",
+        "terms_title": "Termos de Uso",
+        "terms_scroll_info": " Role até o final para desbloquear a caixa de aceitação",
+        "terms_accept": "✓ Li e aceito os termos de uso",
+        "setup_done": "Configuração Concluída!",
+        "finish": "Finalizar Configuração",
+        "theme_info": "Escolha um tema e confirme com o botão 'Próximo'.",
+    },
+    "العربية": {
+        "select_language": "اختر اللغة",
+        "next": "التالي →",
+        "back": "← العودة",
+        "select_theme": "اختر السمة",
+        "terms_title": "شروط الاستخدام",
+        "terms_scroll_info": " قم بالتمرير إلى النهاية لفتح مربع قبول الشروط",
+        "terms_accept": "✓ لقد قرأت وأوافق على شروط الاستخدام",
+        "setup_done": "اكتمل الإعداد!",
+        "finish": "إتمام الإعداد",
+        "theme_info": "اختر سمة وقم بالتأكيد بالضغط على زر 'التالي'.",
+    },
+
 }

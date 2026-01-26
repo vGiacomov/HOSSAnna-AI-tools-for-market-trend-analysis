@@ -9,7 +9,7 @@ from PySide6.QtGui import QPixmap
 
 from Launcher.ConfigManager import ConfigManager
 from Launcher.LauncherThemes import LIGHT_THEME, DARK_THEME
-from Launcher.Launcher_translations import languagesList, TRANSLATIONS
+from Launcher.Launcher_translations import  TRANSLATIONS
 from Launcher.TermsOfUse import TOU
 from AppConfigurator import InitialSettings, AppSettings
 

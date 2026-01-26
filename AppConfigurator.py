@@ -22,6 +22,8 @@ class InitialSettings:
 
 
 
+from typing import FrozenSet
+
 class AppSettings:
     appName: str = "HOSSAnna"
     languages: FrozenSet[str] = frozenset({
@@ -31,8 +33,15 @@ class AppSettings:
         "Deutsch",
         "Español",
         "Italiano",
+        "Português",
         "עברית",
+        "中文",
+        "हिन्दी",
+        "日本語",
+        "Русский",
+        "العربية",
     })
+
 
     @classmethod
     def app_folder_path(cls) -> Path:
