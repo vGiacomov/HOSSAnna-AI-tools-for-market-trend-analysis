@@ -10,6 +10,9 @@ from PySide6.QtCore import Qt, QThread, Signal, QUrl, QTimer
 from PySide6.QtGui import QDesktopServices, QPixmap
 
 from App.App_state import AppState
+    # LIGHT_THEME, DARK_THEME muszą zawierać style: main, card, market_item, ticker_symbol,
+    # price_label, positive_color, negative_color, remove_button, section_header, add_button,
+    # scroll_area, action_button itp.
 from App.translations import TRANSLATIONS
 from App.Pages.HomeThemes import LIGHT_THEME, DARK_THEME
 from Launcher.ConfigManager import ConfigManager
@@ -71,8 +74,8 @@ class HomeConfigExtension:
 class MarketWorker(QThread):
     finished = Signal(dict)
 
-    def __init__(self, tickers):
-        super().__init__()
+    def __init__(self, tickers, parent=None):
+        super().__init__(parent)
         self.tickers = tickers
 
     def run(self):
@@ -87,7 +90,6 @@ class MarketWorker(QThread):
                     info = stock.info
                     hist = stock.history(period="2d")
 
-                    # Get company name with fallback to ticker
                     company_name = info.get('longName', info.get('shortName', ticker))
 
                     if not hist.empty and len(hist) >= 2:
@@ -162,7 +164,6 @@ class MarketItemWidget(QFrame):
         self.update_style()
 
     def update_name(self, name):
-        """Update the displayed name"""
         self.display_name = name
         self.lbl_symbol.setText(self.display_name)
 
@@ -178,10 +179,11 @@ class MarketItemWidget(QFrame):
         self.lbl_change.setText(f"{change:+.2f}%")
 
         color = theme["positive_color"] if change >= 0 else theme["negative_color"]
-        self.lbl_change.setStyleSheet(f"color: {color}; font-weight: 600; font-size: 14px; border: none;")
+        self.lbl_change.setStyleSheet(
+            f"color: {color}; font-weight: 600; font-size: 14px; border: none;"
+        )
 
-        price_style = theme["price_label"]
-        self.lbl_price.setStyleSheet(price_style)
+        self.lbl_price.setStyleSheet(theme["price_label"])
 
     def update_style(self):
         theme = get_theme()
@@ -210,6 +212,7 @@ class FavoritesPanel(CardFrame):
         super().__init__()
         self.tickers = HomeConfigExtension.load_favorites()
         self.items = {}
+        self.worker = None
 
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
@@ -247,7 +250,8 @@ class FavoritesPanel(CardFrame):
 
     def rebuild_list(self):
         for i in reversed(range(self.list_layout.count())):
-            widget = self.list_layout.itemAt(i).widget()
+            item = self.list_layout.itemAt(i)
+            widget = item.widget() if item is not None else None
             if widget:
                 widget.setParent(None)
 
@@ -259,21 +263,31 @@ class FavoritesPanel(CardFrame):
         self.list_layout.addStretch()
 
     def refresh_data(self):
-        if self.tickers:
-            self.worker = MarketWorker(self.tickers)
-            self.worker.finished.connect(self.on_data_received)
-            self.worker.start()
+        if not self.tickers:
+            return
+
+        if self.worker is not None and self.worker.isRunning():
+            return
+
+        self.worker = MarketWorker(self.tickers, parent=self)
+        self.worker.finished.connect(self.on_data_received)
+        self.worker.finished.connect(self._clear_worker)
+        self.worker.start()
+
+    def _clear_worker(self, _data=None):
+        self.worker = None
 
     def on_data_received(self, data):
         for t, values in data.items():
             if t in self.items:
-                # Update the display name with company name
                 if "name" in values:
                     self.items[t].update_name(values["name"])
                 self.items[t].update_data(values["price"], values["change"])
 
     def add_ticker(self):
-        text, ok = QInputDialog.getText(self, get_tr("add_ticker_title"), get_tr("add_ticker_msg"))
+        text, ok = QInputDialog.getText(
+            self, get_tr("add_ticker_title"), get_tr("add_ticker_msg")
+        )
         if ok and text:
             symbol = text.upper().strip()
             if symbol and symbol not in self.tickers:
@@ -298,6 +312,12 @@ class FavoritesPanel(CardFrame):
         if scroll:
             scroll.setStyleSheet(theme["scroll_area"])
 
+    def closeEvent(self, event):
+        if self.worker is not None and self.worker.isRunning():
+            self.worker.quit()
+            self.worker.wait()
+        super().closeEvent(event)
+
 
 class MarketIndicesPanel(CardFrame):
     def __init__(self):
@@ -315,6 +335,7 @@ class MarketIndicesPanel(CardFrame):
         ]
 
         self.items = {}
+        self.worker = None
 
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
@@ -345,16 +366,23 @@ class MarketIndicesPanel(CardFrame):
         self.update_ui()
         self.refresh_data()
 
-        # Auto-refresh co 2 minuty
-        self.timer = QTimer()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self.refresh_data)
-        self.timer.start(120000)
+        self.timer.start(2000)
 
     def refresh_data(self):
         ticker_symbols = [t[0] for t in self.tickers]
-        self.worker = MarketWorker(ticker_symbols)
+
+        if self.worker is not None and self.worker.isRunning():
+            return
+
+        self.worker = MarketWorker(ticker_symbols, parent=self)
         self.worker.finished.connect(self.on_data_received)
+        self.worker.finished.connect(self._clear_worker)
         self.worker.start()
+
+    def _clear_worker(self, _data=None):
+        self.worker = None
 
     def on_data_received(self, data):
         for ticker, values in data.items():
@@ -370,6 +398,16 @@ class MarketIndicesPanel(CardFrame):
         if scroll:
             scroll.setStyleSheet(theme["scroll_area"])
 
+    def closeEvent(self, event):
+        if hasattr(self, "timer"):
+            self.timer.stop()
+
+        if self.worker is not None and self.worker.isRunning():
+            self.worker.quit()
+            self.worker.wait()
+
+        super().closeEvent(event)
+
 
 class WelcomePanel(CardFrame):
     """Panel powitalny"""
@@ -382,17 +420,14 @@ class WelcomePanel(CardFrame):
         layout.setSpacing(20)
         layout.setContentsMargins(5, 5, 5, 5)
 
-        # Logo i podpis
         logo_layout = QVBoxLayout()
         logo_layout.setAlignment(Qt.AlignCenter)
         logo_layout.setSpacing(10)
 
-        # Logo
         self.logo = QLabel()
         self.logo.setAlignment(Qt.AlignCenter)
         self.logo.setStyleSheet("border: none;")
 
-        # Subtitle pod logo
         self.lbl_subtitle = QLabel(get_tr("welcome_title"))
         self.lbl_subtitle.setAlignment(Qt.AlignCenter)
 
@@ -401,10 +436,8 @@ class WelcomePanel(CardFrame):
 
         layout.addLayout(logo_layout)
 
-        # Spacer - wypycha przycisk na dół
         layout.addStretch()
 
-        # Przycisk na dole
         self.btn_repo = QPushButton(f"🌐  {get_tr('open_repo')}")
         self.btn_repo.setCursor(Qt.PointingHandCursor)
         self.btn_repo.setMinimumHeight(50)
@@ -415,39 +448,38 @@ class WelcomePanel(CardFrame):
         self.update_ui()
 
     def update_logo(self):
-        """Aktualizuje logo w zależności od motywu"""
         is_dark = AppState.get_theme() == "dark"
         logo_path = ":/Launcher/Icons/LogoDarkTheme.png" if is_dark else ":/Launcher/Icons/Logo.png"
 
         pixmap = QPixmap(logo_path)
         if not pixmap.isNull():
-            self.logo.setPixmap(pixmap.scaled(256, 256, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self.logo.setPixmap(
+                pixmap.scaled(256, 256, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            )
         else:
-            # Fallback jeśli logo nie zostanie załadowane
             self.logo.setText("📈")
             self.logo.setStyleSheet("font-size: 80px; border: none;")
 
     def open_repo(self):
-        QDesktopServices.openUrl(QUrl("https://github.com/vGiacomov/HOSSAnna---AI-tools-for-market-trend-analysis"))
+        QDesktopServices.openUrl(
+            QUrl("https://github.com/vGiacomov/HOSSAnna---AI-tools-for-market-trend-analysis")
+        )
 
     def update_ui(self):
         theme = get_theme()
         is_dark = AppState.get_theme() == "dark"
 
-        # Aktualizuj logo
         self.update_logo()
 
-        # Subtitle
         self.lbl_subtitle.setText(get_tr("welcome_title"))
-        subtitle_color = "#9B9B9B" if is_dark else "#6B6B6B"
-        self.lbl_subtitle.setStyleSheet(f"font-size: 16px; color: {subtitle_color}; border: none; font-weight: 500;")
+        subtitle_color = "#9B9B9B" if is_dark else "#6B6B9B"
+        self.lbl_subtitle.setStyleSheet(
+            f"font-size: 16px; color: {subtitle_color}; border: none; font-weight: 500;"
+        )
 
-        # Przycisk
         self.btn_repo.setText(f"🌐  {get_tr('open_repo')}")
         self.btn_repo.setStyleSheet(theme["action_button"])
 
-
-# --- Główny Widget Home ---
 
 class HomeWidget(QWidget):
     def __init__(self):

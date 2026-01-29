@@ -2,7 +2,7 @@
 <qresource>
 
 
-    <file>Icons/Logo.ico</file>
+    <file>Launcher/Icons/Logo.ico</file>
     <file>Launcher/Icons/Logo.png</file>
      <file>Launcher/Icons/LogoDarkTheme.png</file>
 

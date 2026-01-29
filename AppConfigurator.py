@@ -25,7 +25,9 @@ class InitialSettings:
 from typing import FrozenSet
 
 class AppSettings:
+
     appName: str = "HOSSAnna"
+
     languages: FrozenSet[str] = frozenset({
         "English",
         "Polski",

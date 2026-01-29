@@ -121,7 +121,7 @@ class SetupWizard(QWidget):
 
         # Language combo
         self.language_combo = QComboBox()
-        self.language_combo.addItems(languagesList)
+        self.language_combo.addItems(AppSettings.languages)
         self.language_combo.currentTextChanged.connect(self.on_language_changed)
         layout.addWidget(self.language_combo, alignment=Qt.AlignCenter)
         self._widgets_to_style["language_combo"] = self.language_combo

@@ -7,7 +7,7 @@ from App.App_state import AppState
 from App.translations import TRANSLATIONS
 from App.Pages.HomePage import get_program_data as get_home_data
 from Launcher.ConfigManager import ConfigManager
-from AppConfigurator import  AppSettings
+from AppConfigurator import AppSettings
 
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt, QSize
@@ -47,7 +47,6 @@ class SettingsWindow(QDialog, AppState):
         main_layout.setContentsMargins(30, 30, 30, 30)
         main_layout.setSpacing(25)
 
-        # Language section
         self.lang_title = self._create_section_label(self.tr_text("language_label"))
         main_layout.addWidget(self.lang_title)
 
@@ -59,7 +58,6 @@ class SettingsWindow(QDialog, AppState):
 
         main_layout.addSpacing(20)
 
-        # Theme section
         self.theme_title = self._create_section_label(self.tr_text("theme_label"))
         main_layout.addWidget(self.theme_title)
 
@@ -72,7 +70,6 @@ class SettingsWindow(QDialog, AppState):
 
         main_layout.addStretch()
 
-        # Buttons
         button_widget = self._create_button_row()
         main_layout.addWidget(button_widget)
 
@@ -252,7 +249,6 @@ class MainWindow(QMainWindow, AppState):
         self.app_folder_path = AppSettings.app_folder_path
         self.config_path = AppSettings.config_path
 
-
         AppState.set_language(self.current_language)
         AppState.set_theme(self.current_theme)
 
@@ -314,6 +310,21 @@ class MainWindow(QMainWindow, AppState):
     def open_settings(self):
         SettingsWindow(self).exec()
 
+    def closeEvent(self, event):
+        # jeżeli ModuleTab przechowuje custom widget w atrybucie main_widget:
+        try:
+            if hasattr(self.home_tab, "main_widget") and self.home_tab.main_widget is not None:
+                self.home_tab.main_widget.close()
+        except Exception as e:
+            print(f"Error closing home_tab main_widget: {e}")
+
+        try:
+            if hasattr(self.prediction_tab, "main_widget") and self.prediction_tab.main_widget is not None:
+                self.prediction_tab.main_widget.close()
+        except Exception as e:
+            print(f"Error closing prediction_tab main_widget: {e}")
+
+        super().closeEvent(event)
 
     """ 
      # not use in this project only as backup to not forger. I will remove it later ;)
